@@ -1,53 +1,62 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import "./App.css";
 
 function App() {
-  const [recipes, setRecipes] = useState([]);
+  const [searchText, setSearchText] = useState("");
+  const [searchResults, setSearchResults] = useState([]);
 
-  useEffect(() => {
-    fetch("http://localhost:3000/api")
-      .then((response) => response.json())
-      .then(handleSuccess, handleError);
-  }, []);
-
-  function handleSuccess(recipes) {
-    setRecipes(recipes);
-  }
-
-  function handleError(error) {
-    console.log(error);
-  }
-
-  if (recipes) {
-    const recipesToDisplay = [];
-
-    for (const {
-      recipe_id,
-      title,
-      ingredients,
-      description,
-      time,
-      instructions,
-    } of recipes) {
-      recipesToDisplay.push(
-        <div key={recipe_id}>
-          <h2>Title: {title}</h2>
-          <p>Ingredients: {ingredients}</p>
-          <p>Description: {description}</p>
-          <p>Time: {time}</p>
-          <p>Instructions: {instructions}</p>
-        </div>
+  const handleSearch = async () => {
+    try {
+      const response = await fetch(
+        `http://localhost:3000/recipes?search=${encodeURIComponent(searchText)}`
       );
+      const recipes = await response.json();
+      setSearchResults(recipes);
+    } catch (error) {
+      console.log(error);
     }
+  };
 
-    return <div>{recipesToDisplay}</div>;
-  } else {
-    return (
-      <div className="App">
-        <h2>Loading...</h2>
-      </div>
+  const handleKeyUp = (e) => {
+    if (e.key === "Enter") {
+      handleSearch();
+    }
+  };
+
+  const recipesToDisplay = [];
+
+  for (const {
+    recipe_id,
+    title,
+    ingredients,
+    description,
+    time,
+    instructions,
+  } of searchResults) {
+    recipesToDisplay.push(
+      <li key={recipe_id}>
+        <h2>Title: {title}</h2>
+        <p>Ingredients: {ingredients}</p>
+        <p>Description: {description}</p>
+        <p>Time: {time}</p>
+        <p>Instructions: {instructions}</p>
+      </li>
     );
   }
+
+  return (
+    <div>
+      <input
+        type="text"
+        value={searchText}
+        onChange={(e) => setSearchText(e.target.value)}
+        onKeyUp={handleKeyUp}
+        placeholder="Enter your search text"
+      />
+      <button onClick={handleSearch}>Search</button>
+      <ul>{recipesToDisplay}</ul>
+    </div>
+  );
 }
 
 export default App;

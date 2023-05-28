@@ -13,7 +13,7 @@ app.get("/", (req, res) => {
   res.send("Hello World!");
 });
 
-app.get("/api", cors(corsOptions), (req, res) => {
+app.get("/recipes", cors(corsOptions), (req, res) => {
   const connection = mysql.createConnection({
     host: "qao3ibsa7hhgecbv.cbetxkdyhwsb.us-east-1.rds.amazonaws.com",
     user: "mn3n4ptcd2yqgjpz",
@@ -30,10 +30,29 @@ app.get("/api", cors(corsOptions), (req, res) => {
     console.log("Connected to the database.");
   });
 
-  connection.query("SELECT * FROM recipes", function (error, results, fields) {
-    if (error) throw error;
-    res.send(results);
-  });
+  const searchText = req.query.search;
+
+  if (searchText === "") {
+    const query = `
+      SELECT * FROM recipes
+      `;
+
+    connection.query(query, [searchText], function (error, results) {
+      if (error) throw error;
+      res.send(results);
+    });
+  } else {
+    const query = `
+        SELECT *
+        FROM recipes
+        WHERE MATCH(title, ingredients, description) AGAINST (?)
+        `;
+
+    connection.query(query, [searchText], function (error, results) {
+      if (error) throw error;
+      res.send(results);
+    });
+  }
 
   connection.end();
 });
