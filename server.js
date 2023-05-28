@@ -2,22 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const app = express();
 const port = 3000;
-var mysql = require("mysql");
-var connection = mysql.createConnection({
-  host: "qao3ibsa7hhgecbv.cbetxkdyhwsb.us-east-1.rds.amazonaws.com",
-  user: "mn3n4ptcd2yqgjpz",
-  password: "yen2q6zo3a2xh8jr",
-  database: "q1lkmt6yskjwxdz1",
-});
-
-connection.connect();
-
-connection.query("SELECT 1 + 1 AS solution", function (error, results, fields) {
-  if (error) throw error;
-  console.log("The solution is: ", results[0].solution);
-});
-
-connection.end();
+const mysql = require("mysql");
 
 const corsOptions = {
   origin: "http://localhost:5173",
@@ -29,13 +14,28 @@ app.get("/", (req, res) => {
 });
 
 app.get("/api", cors(corsOptions), (req, res) => {
-  const data = {
-    one: 1,
-    two: 2,
-    three: 3,
-  };
+  const connection = mysql.createConnection({
+    host: "qao3ibsa7hhgecbv.cbetxkdyhwsb.us-east-1.rds.amazonaws.com",
+    user: "mn3n4ptcd2yqgjpz",
+    password: "yen2q6zo3a2xh8jr",
+    database: "q1lkmt6yskjwxdz1",
+  });
 
-  res.send(data);
+  connection.connect((error) => {
+    if (error) {
+      console.error("Error connecting to database:", error);
+      return;
+    }
+
+    console.log("Connected to the database.");
+  });
+
+  connection.query("SELECT * FROM recipes", function (error, results, fields) {
+    if (error) throw error;
+    res.send(results);
+  });
+
+  connection.end();
 });
 
 app.listen(port, () => {

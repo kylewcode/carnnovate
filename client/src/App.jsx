@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import "./App.css";
 
 function App() {
-  const [dataToDisplay, setDataToDisplay] = useState(null);
+  const [recipes, setRecipes] = useState([]);
 
   useEffect(() => {
     fetch("http://localhost:3000/api")
@@ -10,29 +10,41 @@ function App() {
       .then(handleSuccess, handleError);
   }, []);
 
-  function handleSuccess(data) {
-    console.log(data);
-    setTimeout(() => {
-      setDataToDisplay(data);
-    }, 3000);
+  function handleSuccess(recipes) {
+    setRecipes(recipes);
   }
 
   function handleError(error) {
     console.log(error);
   }
 
-  if (dataToDisplay) {
-    const list = [];
+  if (recipes) {
+    const recipesToDisplay = [];
 
-    for (const data in dataToDisplay) {
-      list.push(<p>{dataToDisplay[data]}</p>);
+    for (const {
+      recipe_id,
+      title,
+      ingredients,
+      description,
+      time,
+      instructions,
+    } of recipes) {
+      recipesToDisplay.push(
+        <div key={recipe_id}>
+          <h2>Title: {title}</h2>
+          <p>Ingredients: {ingredients}</p>
+          <p>Description: {description}</p>
+          <p>Time: {time}</p>
+          <p>Instructions: {instructions}</p>
+        </div>
+      );
     }
 
-    return <div>{list}</div>;
+    return <div>{recipesToDisplay}</div>;
   } else {
     return (
       <div className="App">
-        <p>No data to render!</p>
+        <h2>Loading...</h2>
       </div>
     );
   }
