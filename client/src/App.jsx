@@ -23,7 +23,7 @@ function App() {
     }
   };
 
-  const recipesToDisplay = [];
+  const sortedRecipesToDisplay = [];
 
   for (const {
     recipe_id,
@@ -32,14 +32,16 @@ function App() {
     description,
     time,
     instructions,
+    votes,
   } of searchResults) {
-    recipesToDisplay.push(
+    sortedRecipesToDisplay.push(
       <li key={recipe_id}>
         <h2>Title: {title}</h2>
         <p>Ingredients: {ingredients}</p>
         <p>Description: {description}</p>
         <p>Time: {time}</p>
         <p>Instructions: {instructions}</p>
+        <p>Votes: {votes}</p>
       </li>
     );
   }
@@ -54,7 +56,7 @@ function App() {
         placeholder="Enter your search text"
       />
       <button onClick={handleSearch}>Search</button>
-      <ul>{recipesToDisplay}</ul>
+      <ul>{sortedRecipesToDisplay}</ul>
     </div>
   );
 }
