@@ -4,9 +4,11 @@ import "./App.css";
 function App() {
   const [searchText, setSearchText] = useState("");
   const [searchResults, setSearchResults] = useState([]);
+  const [sortState, setSortState] = useState("sort-none");
   const recipesToDisplay = [];
 
   const handleSearch = async () => {
+    // 1. Retrieve search results.
     try {
       const response = await fetch(
         `http://localhost:3000/recipes?search=${encodeURIComponent(searchText)}`
@@ -24,9 +26,7 @@ function App() {
     }
   };
 
-  const sortDefault = () => {};
   const sortByTitle = () => {
-    // Sort search results
     const sortedResultsByTitle = [...searchResults].sort((next, current) => {
       if (next.title < current.title) {
         return -1;
@@ -38,33 +38,103 @@ function App() {
 
       return 0;
     });
-    console.log(sortedResultsByTitle);
-    // update state
-    setSearchResults(sortedResultsByTitle);
+
+    return sortedResultsByTitle;
   };
-  const sortByTime = () => {};
-  const sortByVotes = () => {};
+
+  const sortByTime = () => {
+    const sortedResultsByTime = [...searchResults].sort((next, current) => {
+      if (next.time < current.time) {
+        return -1;
+      }
+
+      if (next.time > current.time) {
+        return 1;
+      }
+
+      return 0;
+    });
+
+    return sortedResultsByTime;
+  };
+
+  const sortByVotes = () => {
+    const sortedResultsByVotes = [...searchResults].sort((next, current) => {
+      if (next.votes > current.votes) {
+        return -1;
+      }
+
+      if (next.votes < current.votes) {
+        return 1;
+      }
+
+      return 0;
+    });
+
+    return sortedResultsByVotes;
+  };
+
+  const sortDefault = () => {
+    return [...searchResults];
+  };
+
+  // (This code will sort as expected. 50%)(True 100%)
+  // const handleDropdown = (e) => {
+  //   const option = e.target.value;
+
+  //   if (option === "sort-title") {
+  //     sortByTitle();
+  //   }
+  //   if (option === "sort-time") {
+  //     sortByTime();
+  //   }
+  //   if (option === "sort-votes") {
+  //     sortByVotes();
+  //   }
+
+  //   if (option === "sort-none") {
+  //     sortDefault();
+  //   }
+  // };
 
   const handleDropdown = (e) => {
-    console.log("handleDropdown", e.target.value);
     const option = e.target.value;
 
     if (option === "sort-title") {
-      sortByTitle();
-    }
-    if (option === "sort-time") {
-      sortByTime();
-    }
-    if (option === "sort-votes") {
-      sortByVotes();
-    }
-
-    if (option === "sort-none") {
-      sortDefault();
+      setSortState("sort-title");
+    } else if (option === "sort-time") {
+      setSortState("sort-time");
+    } else if (option === "sort-votes") {
+      setSortState("sort-votes");
+    } else {
+      setSortState("sort-none");
     }
   };
 
+  // Triggers infinite renders.
+  // if (sortState === "sort-title") {
+  //   sortByTitle();
+  // } else if (sortState === "sort-time") {
+  //   sortByTime();
+  // } else if (sortState === "sort-votes") {
+  //   sortByVotes();
+  // } else {
+  //   sortDefault();
+  // }
+
   if (searchResults.length !== 0) {
+    // 2. Find out what sort method is selected.
+    let sortedSearchResults = [];
+    if (sortState === "sort-title") {
+      sortedSearchResults = sortByTitle();
+    } else if (sortState === "sort-time") {
+      sortedSearchResults = sortByTime();
+    } else if (sortState === "sort-votes") {
+      sortedSearchResults = sortByVotes();
+    } else if (sortState === "sort-none") {
+      sortedSearchResults = sortDefault();
+    }
+    // Return sorted results.
     for (const {
       recipe_id,
       title,
@@ -73,7 +143,7 @@ function App() {
       time,
       instructions,
       votes,
-    } of searchResults) {
+    } of sortedSearchResults) {
       recipesToDisplay.push(
         <li key={recipe_id}>
           <h2>Title: {title}</h2>
