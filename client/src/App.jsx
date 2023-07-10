@@ -8,7 +8,6 @@ function App() {
   const recipesToDisplay = [];
 
   const handleSearch = async () => {
-    // 1. Retrieve search results.
     try {
       const response = await fetch(
         `http://localhost:3000/recipes?search=${encodeURIComponent(searchText)}`
@@ -78,25 +77,6 @@ function App() {
     return [...searchResults];
   };
 
-  // (This code will sort as expected. 50%)(True 100%)
-  // const handleDropdown = (e) => {
-  //   const option = e.target.value;
-
-  //   if (option === "sort-title") {
-  //     sortByTitle();
-  //   }
-  //   if (option === "sort-time") {
-  //     sortByTime();
-  //   }
-  //   if (option === "sort-votes") {
-  //     sortByVotes();
-  //   }
-
-  //   if (option === "sort-none") {
-  //     sortDefault();
-  //   }
-  // };
-
   const handleDropdown = (e) => {
     const option = e.target.value;
 
@@ -111,20 +91,9 @@ function App() {
     }
   };
 
-  // Triggers infinite renders.
-  // if (sortState === "sort-title") {
-  //   sortByTitle();
-  // } else if (sortState === "sort-time") {
-  //   sortByTime();
-  // } else if (sortState === "sort-votes") {
-  //   sortByVotes();
-  // } else {
-  //   sortDefault();
-  // }
-
   if (searchResults.length !== 0) {
-    // 2. Find out what sort method is selected.
     let sortedSearchResults = [];
+
     if (sortState === "sort-title") {
       sortedSearchResults = sortByTitle();
     } else if (sortState === "sort-time") {
@@ -134,7 +103,7 @@ function App() {
     } else if (sortState === "sort-none") {
       sortedSearchResults = sortDefault();
     }
-    // Return sorted results.
+
     for (const {
       recipe_id,
       title,
