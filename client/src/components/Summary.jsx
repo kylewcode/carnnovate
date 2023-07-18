@@ -25,7 +25,6 @@ function Summary({
         <p>Ingredients: {ingredients}</p>
         <p>Description: {description}</p>
         <p>Time: {time}</p>
-        <p>Instructions: {instructions}</p>
         <p>Votes: {votes}</p>
         <button type="button" onClick={handleClick}>
           View recipe

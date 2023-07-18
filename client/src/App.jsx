@@ -5,48 +5,24 @@ import Detail from "./components/Detail";
 import Create from "./components/Create";
 import "./App.css";
 
+// Purpose: Render components
 function App() {
   const [userIsCreating, setUserIsCreating] = useState(false);
   const [recipeDetails, setRecipeDetails] = useState(null);
-  // if user is creating a recipe...
-  // if (userIsCreating) {
-  //   return (
-  //     <>
-  //       <h1>Carnnovate</h1>
-  //       <p>A user created recipe database for the carnivore diet</p>
-  //       <Create />
-  //       <Search examineRecipe={setRecipeDetails} />
-  //     </>
-  //   );
-  // }
-  // // If user is reading details of a recipe...
-  // if (recipeDetails) {
-  //   return (
-  //     <>
-  //       <h1>Carnnovate</h1>
-  //       <p>A user created recipe database for the carnivore diet</p>
-  //       <Detail recipeDetails={recipeDetails} exitView={setRecipeDetails} />
-  //       <Search examineRecipe={setRecipeDetails} />
-  //     </>
-  //   );
-  // }
 
-  // return (
-  //   <>
-  //     <h1>Carnnovate</h1>
-  //     <p>A user created recipe database for the carnivore diet</p>
-  //     <Search examineRecipe={setRecipeDetails} />
-  //   </>
-  // );
+  const handleClick = () => {
+    setUserIsCreating(true);
+  };
 
   return (
     <>
       <h1>Carnnovate</h1>
       <p>A user created recipe database for the carnivore diet</p>
+      <button onClick={handleClick}>Create a new recipe!</button>
       {recipeDetails ? (
         <Detail recipeDetails={recipeDetails} exitView={setRecipeDetails} />
       ) : null}
-      {userIsCreating ? <Create /> : null}
+      {userIsCreating ? <Create userIsCreating={setUserIsCreating} /> : null}
       <Search examineRecipe={setRecipeDetails} />
     </>
   );
