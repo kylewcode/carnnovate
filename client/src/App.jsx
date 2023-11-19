@@ -115,11 +115,8 @@ function App() {
     } of sortedSearchResults) {
       recipesToDisplay.push(
         <li key={recipe_id}>
-          <h2>Title: {title}</h2>
-          <p>Ingredients: {ingredients}</p>
-          <p>Description: {description}</p>
+          <h2>{title}</h2>
           <p>Time: {time}</p>
-          <p>Instructions: {instructions}</p>
           <p>Votes: {votes}</p>
         </li>
       );
