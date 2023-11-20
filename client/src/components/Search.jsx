@@ -68,7 +68,7 @@ function Search() {
             votes,
         } of sortedSearchResults) {
             recipesToDisplay.push(
-                <Summary recipe_id={recipe_id} title={title} time={time} votes={votes} />
+                <Summary key={recipe_id} title={title} time={time} votes={votes} />
             );
         }
     }

@@ -1,6 +1,6 @@
-function Summary({ recipe_id, title, time, votes }) {
+function Summary({ title, time, votes }) {
     return (
-        <li key={recipe_id}>
+        <li>
             <h2>{title}</h2>
             <p>Time: {time}</p>
             <p>Votes: {votes}</p>
