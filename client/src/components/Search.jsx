@@ -1,8 +1,11 @@
 import { useState } from "react";
+
 import { sortByTitle } from "../utils/sorts";
 import { sortByTime } from "../utils/sorts";
 import { sortByVotes } from "../utils/sorts";
 import { sortDefault } from "../utils/sorts";
+
+import Summary from "./Summary";
 
 function Search() {
     const [searchText, setSearchText] = useState("");
@@ -65,11 +68,7 @@ function Search() {
             votes,
         } of sortedSearchResults) {
             recipesToDisplay.push(
-                <li key={recipe_id}>
-                    <h2>{title}</h2>
-                    <p>Time: {time}</p>
-                    <p>Votes: {votes}</p>
-                </li>
+                <Summary recipe_id={recipe_id} title={title} time={time} votes={votes} />
             );
         }
     }
