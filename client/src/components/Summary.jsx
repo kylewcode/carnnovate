@@ -1,9 +1,13 @@
-function Summary({ title, time, votes }) {
+import { Link } from "react-router-dom";
+
+function Summary({ recipe }) {
     return (
         <li>
-            <h2>{title}</h2>
-            <p>Time: {time}</p>
-            <p>Votes: {votes}</p>
+            <Link to={`detail/${recipe.recipe_id}`} state={recipe}>
+                <h2>{recipe.title}</h2>
+            </Link>
+            <p>Time: {recipe.time}</p>
+            <p>Votes: {recipe.votes}</p>
         </li>
     )
 }

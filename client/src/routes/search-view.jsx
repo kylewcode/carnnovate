@@ -5,9 +5,9 @@ import { sortByTime } from "../utils/sorts";
 import { sortByVotes } from "../utils/sorts";
 import { sortDefault } from "../utils/sorts";
 
-import Summary from "./Summary";
+import Summary from "..//components/Summary";
 
-function Search() {
+export default function Search() {
     const [searchText, setSearchText] = useState("");
     const [searchResults, setSearchResults] = useState([]);
     const [sortState, setSortState] = useState("sort-none");
@@ -58,17 +58,9 @@ function Search() {
             sortedSearchResults = sortDefault(searchResults);
         }
 
-        for (const {
-            recipe_id,
-            title,
-            ingredients,
-            description,
-            time,
-            instructions,
-            votes,
-        } of sortedSearchResults) {
+        for (const result of sortedSearchResults) {
             recipesToDisplay.push(
-                <Summary key={recipe_id} title={title} time={time} votes={votes} />
+                <Summary key={result.recipe_id} recipe={result} />
             );
         }
     }
@@ -99,5 +91,3 @@ function Search() {
         </div>
     );
 }
-
-export default Search;

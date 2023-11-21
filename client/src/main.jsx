@@ -3,7 +3,8 @@ import ReactDOM from 'react-dom/client'
 
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 
-import Root from './routes/root'
+import Root from './routes/root';
+import Search from './routes/search-view';
 import Detail from "./routes/detail-view";
 import ErrorPage from './error-page';
 
@@ -13,11 +14,17 @@ const router = createBrowserRouter([
   {
     path: "/",
     element: <Root />,
-    errorElement: <ErrorPage />
-  },
-  {
-    path: "detail",
-    element: <Detail />
+    errorElement: <ErrorPage />,
+    children: [
+      {
+        path: "search",
+        element: <Search />,
+      },
+      {
+        path: "search/detail/:recipe_id",
+        element: <Detail />
+      },
+    ]
   }
 ]);
 
