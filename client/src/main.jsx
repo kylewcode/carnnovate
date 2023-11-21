@@ -6,6 +6,7 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import Root from './routes/root';
 import Search from './routes/search-view';
 import Detail from "./routes/detail-view";
+import Create from './routes/create-view';
 import ErrorPage from './error-page';
 
 import './index.css'
@@ -24,6 +25,10 @@ const router = createBrowserRouter([
         path: "search/detail/:recipe_id",
         element: <Detail />
       },
+      {
+        path: "create",
+        element: <Create />
+      }
     ]
   }
 ]);

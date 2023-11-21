@@ -12,7 +12,9 @@ export default function Root() {
                     <li>
                         <Link to={`search`}>Search</Link>
                     </li>
-                    <li>Link 3</li>
+                    <li>
+                        <Link to={`create`}>Create New Recipe</Link>
+                    </li>
                 </ul></nav>
             <div>
                 <Outlet />
