@@ -1,5 +1,13 @@
 import { Form } from 'react-router-dom';
 
+export async function action({ request }) {
+    // (params is a post request 50%)(False Throws an error. POST request is made to /create route.)
+    // (params is a post request 60%)(True)
+    let formData = await request.formData();
+    console.log(formData);
+    return null;
+}
+
 export default function Create() {
     return (
         <Form method='post'>
