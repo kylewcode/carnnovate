@@ -1,3 +1,6 @@
+require('dotenv').config();
+const { HOST, USER, DB_PASSWORD, DB } = process.env;
+
 const express = require("express");
 const cors = require("cors");
 const app = express();
@@ -15,10 +18,10 @@ app.get("/", (req, res) => {
 
 app.get("/recipes", cors(corsOptions), (req, res) => {
   const connection = mysql.createConnection({
-    host: "qao3ibsa7hhgecbv.cbetxkdyhwsb.us-east-1.rds.amazonaws.com",
-    user: "mn3n4ptcd2yqgjpz",
-    password: "yen2q6zo3a2xh8jr",
-    database: "q1lkmt6yskjwxdz1",
+    host: HOST,
+    user: USER,
+    password: DB_PASSWORD,
+    database: DB,
   });
 
   connection.connect((error) => {
