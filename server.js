@@ -1,7 +1,10 @@
-require('dotenv').config();
+require("dotenv").config();
 const { HOST, USER, DB_PASSWORD, DB } = process.env;
 
 const express = require("express");
+const bodyParser = require("body-parser");
+const multer = require("multer");
+const upload = multer({ dest: "uploads/" });
 const cors = require("cors");
 const app = express();
 const port = 3000;
@@ -12,11 +15,13 @@ const corsOptions = {
   optionsSuccessStatus: 200,
 };
 
+app.use(cors(corsOptions));
+
 app.get("/", (req, res) => {
   res.send("Hello World!");
 });
 
-app.get("/recipes", cors(corsOptions), (req, res) => {
+app.get("/recipes", (req, res) => {
   const connection = mysql.createConnection({
     host: HOST,
     user: USER,
@@ -56,6 +61,40 @@ app.get("/recipes", cors(corsOptions), (req, res) => {
       res.send(results);
     });
   }
+
+  connection.end();
+});
+
+app.post("/create", upload.none(), (req, res) => {
+  const { title, description, ingredients, instructions, time } = req.body;
+
+  const connection = mysql.createConnection({
+    host: HOST,
+    user: USER,
+    password: DB_PASSWORD,
+    database: DB,
+  });
+
+  connection.connect((error) => {
+    if (error) {
+      console.error("Error connecting to database:", error);
+      return;
+    }
+
+    console.log("Connected to the database.");
+  });
+
+  const query = `
+  INSERT INTO recipes (title, ingredients, description, time)
+  VALUES (?, ?, ?, ?)
+  `;
+
+  const recipeAttributes = [title, description, ingredients, time];
+
+  connection.query(query, recipeAttributes, function (error, results) {
+    if (error) throw error;
+    res.send(results);
+  });
 
   connection.end();
 });
