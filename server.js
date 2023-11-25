@@ -65,6 +65,11 @@ app.get("/recipes", (req, res) => {
   connection.end();
 });
 
+app.get("user", (req, res) => {
+  console.log("user data requested");
+  res.send({ data: "sample " });
+});
+
 app.post("/create", upload.none(), (req, res) => {
   const { title, description, ingredients, instructions, time } = req.body;
 
