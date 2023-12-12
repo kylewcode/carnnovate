@@ -6,6 +6,8 @@ const bodyParser = require("body-parser");
 const multer = require("multer");
 const upload = multer({ dest: "uploads/" });
 const cors = require("cors");
+const { expressjwt: jwt } = require("express-jwt");
+const jwksRsa = require("jwks-rsa");
 const app = express();
 const port = 3000;
 const mysql = require("mysql");
@@ -16,6 +18,18 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
+
+const checkJwt = jwt({
+  secret: jwksRsa.expressJwtSecret({
+    cache: true,
+    rateLimit: true,
+    jwksRequestsPerMinute: 5,
+    jwksUri: "https://dev-vzyetmmalo5qhq3t.us.auth0.com/.well-known/jwks.json",
+  }),
+  audience: "https://dev-vzyetmmalo5qhq3t.us.auth0.com/api/v2/",
+  issuer: "https://dev-vzyetmmalo5qhq3t.us.auth0.com/",
+  algorithms: ["RS256"],
+});
 
 app.get("/", (req, res) => {
   res.send("Hello World!");
@@ -70,8 +84,9 @@ app.get("user", (req, res) => {
   res.send({ data: "sample " });
 });
 
-app.post("/create", upload.none(), (req, res) => {
+app.post("/create", checkJwt, upload.none(), (req, res) => {
   const { title, description, ingredients, instructions, time } = req.body;
+  const userId = req.auth.sub;
 
   const connection = mysql.createConnection({
     host: HOST,
@@ -90,11 +105,11 @@ app.post("/create", upload.none(), (req, res) => {
   });
 
   const query = `
-  INSERT INTO recipes (title, ingredients, description, time)
-  VALUES (?, ?, ?, ?)
+  INSERT INTO recipes (user_id, title, ingredients, description, time)
+  VALUES (?, ?, ?, ?, ?)
   `;
 
-  const recipeAttributes = [title, description, ingredients, time];
+  const recipeAttributes = [userId, title, ingredients, description, time];
 
   connection.query(query, recipeAttributes, function (error, results) {
     if (error) throw error;

@@ -47,6 +47,9 @@ ReactDOM.createRoot(document.getElementById("root")).render(
       clientId="JQg8lpJ56rVQGFpJWvWo7MwujdSpzweb"
       authorizationParams={{
         redirect_uri: window.location.origin,
+        audience: "https://dev-vzyetmmalo5qhq3t.us.auth0.com/api/v2/",
+        // Will revisit scopes as it pertains to app security.
+        // scope: "read:current_user update:current_user_metadata",
       }}
     >
       <RouterProvider router={router} />

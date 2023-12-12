@@ -1,5 +1,8 @@
 import { Form } from "react-router-dom";
 import { useAuth0 } from "@auth0/auth0-react";
+import { useEffect } from "react";
+
+let userAccessToken = null;
 
 export async function action({ request }) {
   const formData = await request.formData();
@@ -7,13 +10,39 @@ export async function action({ request }) {
   await fetch("http://localhost:3000/create", {
     method: "POST",
     body: formData,
+    headers: {
+      Authorization: `Bearer ${userAccessToken}`,
+    },
   });
 
   return null;
 }
 
 export default function Create() {
-  const { isAuthenticated, isLoading } = useAuth0();
+  const { isAuthenticated, isLoading, getAccessTokenSilently } = useAuth0();
+
+  useEffect(() => {
+    const getAccessToken = async () => {
+      const domain = "dev-vzyetmmalo5qhq3t.us.auth0.com";
+
+      try {
+        const accessToken = await getAccessTokenSilently({
+          authorizationParams: {
+            audience: `https://${domain}/api/v2/`,
+            scope: "read:current_user",
+          },
+        });
+
+        // console.log(accessToken);
+        userAccessToken = accessToken;
+        // console.log(userAccessToken);
+      } catch (error) {
+        console.log(error.message);
+      }
+    };
+
+    getAccessToken();
+  }, [getAccessTokenSilently]);
 
   if (isLoading) {
     return <div>Loading ...</div>;
