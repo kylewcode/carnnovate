@@ -7,9 +7,13 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import Root from "./routes/root";
 import Search from "./routes/search-view";
 import Detail from "./routes/detail-view";
+<<<<<<< HEAD
 import Create, { action as createAction } from "./routes/create-view";
 import Profile from "./routes/profile-view";
 import ErrorPage from "./error-page";
+=======
+import ErrorPage from './error-page';
+>>>>>>> parent of b37ad81 (Req fulfilled: it must have a recipe creation view)
 
 import "./index.css";
 
@@ -27,6 +31,7 @@ const router = createBrowserRouter([
         path: "search/detail/:recipe_id",
         element: <Detail />,
       },
+<<<<<<< HEAD
       {
         path: "create",
         element: <Create />,
@@ -38,6 +43,10 @@ const router = createBrowserRouter([
       },
     ],
   },
+=======
+    ]
+  }
+>>>>>>> parent of b37ad81 (Req fulfilled: it must have a recipe creation view)
 ]);
 
 ReactDOM.createRoot(document.getElementById("root")).render(
