@@ -90,7 +90,7 @@ app.post("/create", upload.none(), (req, res) => {
   });
 
   const query = `
-  INSERT INTO recipes (title, ingredients, description, time)
+  INSERT INTO recipes (title, description, ingredients, time)
   VALUES (?, ?, ?, ?)
   `;
 
