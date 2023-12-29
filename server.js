@@ -73,6 +73,10 @@ app.get("user", (req, res) => {
 app.post("/create", upload.none(), (req, res) => {
   const { title, description, ingredients, instructions, time } = req.body;
 
+  // Existing user id must be inserted or database update will fail due to foreign key restrains
+  // on recipes table for user_id.
+  const userId = "1";
+
   const connection = mysql.createConnection({
     host: HOST,
     user: USER,
@@ -90,11 +94,11 @@ app.post("/create", upload.none(), (req, res) => {
   });
 
   const query = `
-  INSERT INTO recipes (title, description, ingredients, time)
-  VALUES (?, ?, ?, ?)
+  INSERT INTO recipes (user_id, title, description, ingredients, time)
+  VALUES (?, ?, ?, ?, ?)
   `;
 
-  const recipeAttributes = [title, description, ingredients, time];
+  const recipeAttributes = [userId, title, description, ingredients, time];
 
   connection.query(query, recipeAttributes, function (error, results) {
     if (error) throw error;
