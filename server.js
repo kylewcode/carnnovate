@@ -10,6 +10,9 @@ const app = express();
 const port = 3000;
 const mysql = require("mysql");
 
+const bcrypt = require("bcrypt");
+const saltRounds = 10;
+
 const corsOptions = {
   origin: "http://localhost:5173",
   optionsSuccessStatus: 200,
@@ -65,9 +68,58 @@ app.get("/recipes", (req, res) => {
   connection.end();
 });
 
-app.get("user", (req, res) => {
-  console.log("user data requested");
-  res.send({ data: "sample " });
+app.post("/register", upload.none(), async (req, res) => {
+  console.log("registering user...");
+
+  // Gather form info
+  const {
+    "user-name": userName,
+    email,
+    "password-1": password1,
+    "password-2": password2,
+  } = req.body;
+
+  if (password1 !== password2) {
+    throw new Error({ message: "passwords do not match" });
+  }
+
+  // Encrypt passwords
+  await bcrypt.hash(password1, saltRounds, function (err, hash) {
+    if (err) {
+      console.error(err);
+    } else {
+      // Submit to db
+      const connection = mysql.createConnection({
+        host: HOST,
+        user: USER,
+        password: DB_PASSWORD,
+        database: DB,
+      });
+
+      connection.connect((error) => {
+        if (error) {
+          console.error("Error connecting to database:", error);
+          return;
+        }
+
+        console.log("Connected to the database.");
+      });
+
+      const query = `
+        INSERT INTO users (user_name, email, password)
+        VALUES (?, ?, ?)
+      `;
+
+      const userAttributes = [userName, email, hash];
+
+      connection.query(query, userAttributes, function (error, results) {
+        if (error) throw error;
+        res.send(results);
+      });
+
+      connection.end();
+    }
+  });
 });
 
 app.post("/create", upload.none(), (req, res) => {

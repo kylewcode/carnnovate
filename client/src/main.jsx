@@ -7,6 +7,7 @@ import Root from "./routes/root";
 import Search from "./routes/search-view";
 import Detail from "./routes/detail-view";
 import Create, { action as createAction } from "./routes/create-view";
+import Register, { action as registerAction } from "./routes/register-view";
 import ErrorPage from "./error-page";
 
 import "./index.css";
@@ -29,6 +30,11 @@ const router = createBrowserRouter([
         path: "create",
         element: <Create />,
         action: createAction,
+      },
+      {
+        path: "register",
+        element: <Register />,
+        action: registerAction,
       },
     ],
   },

@@ -15,6 +15,9 @@ export default function Root() {
           <li>
             <Link to={`create`}>Create New Recipe</Link>
           </li>
+          <li>
+            <Link to={`register`}>Sign Up</Link>
+          </li>
         </ul>
       </nav>
       <div>
