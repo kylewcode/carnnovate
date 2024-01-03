@@ -1,5 +1,5 @@
 require("dotenv").config();
-const { HOST, USER, DB_PASSWORD, DB } = process.env;
+const { HOST, USER, DB_PASSWORD, DB, LONG_RANDOM_STRING } = process.env;
 
 const express = require("express");
 const bodyParser = require("body-parser");
@@ -9,6 +9,7 @@ const cors = require("cors");
 const app = express();
 const port = 3000;
 const mysql = require("mysql");
+const session = require("express-session");
 
 const bcrypt = require("bcrypt");
 const saltRounds = 10;
@@ -19,6 +20,13 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
+app.use(
+  session({
+    secret: LONG_RANDOM_STRING,
+    resave: false,
+    saveUninitialized: false,
+  })
+);
 
 app.get("/", (req, res) => {
   res.send("Hello World!");
@@ -71,7 +79,6 @@ app.get("/recipes", (req, res) => {
 app.post("/register", upload.none(), async (req, res) => {
   console.log("registering user...");
 
-  // Gather form info
   const {
     "user-name": userName,
     email,
@@ -83,12 +90,10 @@ app.post("/register", upload.none(), async (req, res) => {
     throw new Error({ message: "passwords do not match" });
   }
 
-  // Encrypt passwords
   await bcrypt.hash(password1, saltRounds, function (err, hash) {
     if (err) {
       console.error(err);
     } else {
-      // Submit to db
       const connection = mysql.createConnection({
         host: HOST,
         user: USER,
@@ -118,6 +123,50 @@ app.post("/register", upload.none(), async (req, res) => {
       });
 
       connection.end();
+    }
+  });
+});
+
+app.post("/login", upload.none(), (req, res) => {
+  const { username, password } = req.body;
+
+  const connection = mysql.createConnection({
+    host: HOST,
+    user: USER,
+    password: DB_PASSWORD,
+    database: DB,
+  });
+
+  connection.connect((error) => {
+    if (error) {
+      console.error("Error connecting to database:", error);
+      return;
+    }
+
+    console.log("Connected to the database.");
+  });
+
+  const query = `
+    SELECT * FROM users
+    WHERE user_name = "${username}"
+  `;
+
+  connection.query(query, async function (error, results) {
+    if (error) throw error;
+
+    if (results.length !== 0) {
+      const hash = results[0].password;
+      const userId = results[0].user_id;
+      const isValidPassword = await bcrypt.compare(password, hash);
+
+      if (isValidPassword) {
+        req.session.user_id = userId;
+        res.status(200).send({ message: "Password valid" });
+      } else {
+        res.status(200).send({ message: "Password invalid" });
+      }
+    } else {
+      res.status(200).send({ message: "User does not exist." });
     }
   });
 });

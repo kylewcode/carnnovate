@@ -8,6 +8,7 @@ import Search from "./routes/search-view";
 import Detail from "./routes/detail-view";
 import Create, { action as createAction } from "./routes/create-view";
 import Register, { action as registerAction } from "./routes/register-view";
+import Login, { action as loginAction } from "./routes/login-view";
 import ErrorPage from "./error-page";
 
 import "./index.css";
@@ -35,6 +36,11 @@ const router = createBrowserRouter([
         path: "register",
         element: <Register />,
         action: registerAction,
+      },
+      {
+        path: "login",
+        element: <Login />,
+        action: loginAction,
       },
     ],
   },
