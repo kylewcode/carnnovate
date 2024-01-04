@@ -29,7 +29,8 @@ app.use(
 );
 
 app.get("/", (req, res) => {
-  res.send("Hello World!");
+  req.session.username = "Kyle";
+  res.send(`Hello ${req.session.username}`);
 });
 
 app.get("/recipes", (req, res) => {
@@ -74,6 +75,29 @@ app.get("/recipes", (req, res) => {
   }
 
   connection.end();
+});
+
+app.get("/auth", upload.none(), (req, res) => {
+  console.log("auth route");
+  console.log(req.session);
+  if (req.session.user_id) {
+    console.log(req.session.user_id);
+    res.status(200).send({ isAuthorized: true });
+  } else {
+    res.status(500).send({ message: "Error authorizing user" });
+  }
+});
+
+app.get("/logout", upload.none(), (req, res) => {
+  req.session.destroy(function (err) {
+    if (err) {
+      res
+        .status(500)
+        .send({ message: "Session data could not be destroyed.", error: err });
+    } else {
+      res.status(200).send({ message: "Session cleared." });
+    }
+  });
 });
 
 app.post("/register", upload.none(), async (req, res) => {
@@ -157,16 +181,26 @@ app.post("/login", upload.none(), (req, res) => {
     if (results.length !== 0) {
       const hash = results[0].password;
       const userId = results[0].user_id;
+      const email = results[0].email;
       const isValidPassword = await bcrypt.compare(password, hash);
 
       if (isValidPassword) {
         req.session.user_id = userId;
-        res.status(200).send({ message: "Password valid" });
+        req.session.email = email;
+        req.session.username = username;
+
+        console.log(req.session);
+
+        res.status(200).send({ message: "User logged in", isAuthorized: true });
       } else {
-        res.status(200).send({ message: "Password invalid" });
+        res
+          .status(200)
+          .send({ message: "Password invalid", isAuthorized: false });
       }
     } else {
-      res.status(200).send({ message: "User does not exist." });
+      res
+        .status(200)
+        .send({ message: "User does not exist.", isAuthorized: false });
     }
   });
 });

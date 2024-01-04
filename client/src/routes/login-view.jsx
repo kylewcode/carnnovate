@@ -1,17 +1,31 @@
-import { Form } from "react-router-dom";
+import { useEffect } from "react";
+import { Form, useActionData, useOutletContext } from "react-router-dom";
 
 export async function action({ request }) {
   const formData = await request.formData();
 
-  await fetch("http://localhost:3000/login", {
+  const response = await fetch("http://localhost:3000/login", {
     method: "POST",
     body: formData,
   });
 
-  return null;
+  const auth = await response.json();
+
+  return auth.isAuthorized;
 }
 
 export default function Login() {
+  const [isLoggedIn, setIsLoggedIn] = useOutletContext();
+  const isAuthorized = useActionData();
+
+  useEffect(() => {
+    if (isAuthorized === undefined) {
+      setIsLoggedIn(false);
+    } else {
+      setIsLoggedIn(isAuthorized);
+    }
+  }, [setIsLoggedIn, isAuthorized]);
+
   return (
     <Form method="post" encType="multipart/form-data">
       <label htmlFor="username">User Name</label>

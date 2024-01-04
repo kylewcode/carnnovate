@@ -9,6 +9,7 @@ import Detail from "./routes/detail-view";
 import Create, { action as createAction } from "./routes/create-view";
 import Register, { action as registerAction } from "./routes/register-view";
 import Login, { action as loginAction } from "./routes/login-view";
+import Profile from "./routes/profile-view";
 import ErrorPage from "./error-page";
 
 import "./index.css";
@@ -41,6 +42,10 @@ const router = createBrowserRouter([
         path: "login",
         element: <Login />,
         action: loginAction,
+      },
+      {
+        path: "profile",
+        element: <Profile />,
       },
     ],
   },
