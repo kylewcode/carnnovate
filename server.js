@@ -1,4 +1,5 @@
 require("dotenv").config();
+const { appendToFile, clearFile } = require("./utils/fs");
 const { HOST, USER, DB_PASSWORD, DB, LONG_RANDOM_STRING } = process.env;
 
 const express = require("express");
@@ -100,7 +101,7 @@ app.get("/logout", upload.none(), (req, res) => {
   });
 });
 
-app.post("/register", upload.none(), async (req, res) => {
+app.post("/register", upload.none(), (req, res) => {
   console.log("registering user...");
 
   const {
@@ -114,7 +115,7 @@ app.post("/register", upload.none(), async (req, res) => {
     throw new Error({ message: "passwords do not match" });
   }
 
-  await bcrypt.hash(password1, saltRounds, function (err, hash) {
+  bcrypt.hash(password1, saltRounds, function (err, hash) {
     if (err) {
       console.error(err);
     } else {
@@ -203,6 +204,8 @@ app.post("/login", upload.none(), (req, res) => {
         .send({ message: "User does not exist.", isAuthorized: false });
     }
   });
+
+  connection.end();
 });
 
 app.post("/create", upload.none(), (req, res) => {
@@ -241,6 +244,185 @@ app.post("/create", upload.none(), (req, res) => {
   });
 
   connection.end();
+});
+
+app.post("/request-reset", upload.none(), (req, res) => {
+  const email = req.body.email;
+
+  const connection = mysql.createConnection({
+    host: HOST,
+    user: USER,
+    password: DB_PASSWORD,
+    database: DB,
+  });
+
+  connection.connect((error) => {
+    if (error) {
+      console.error("Error connecting to database:", error);
+
+      return;
+    }
+
+    console.log("Connected to the database.");
+  });
+
+  const query = `
+    SELECT * FROM users
+    WHERE email = "${email}"
+  `;
+
+  connection.query(query, function (error, results) {
+    if (error) throw error;
+
+    if (results.length !== 0) {
+      const stringToHash = String(results.user_id) + Date();
+      const { user_id: userId } = results[0];
+
+      bcrypt.hash(stringToHash, saltRounds, async function (err, hash) {
+        if (err) throw err;
+
+        const encodedHash = encodeURIComponent(hash).replaceAll(".", "");
+
+        connection.query(
+          "INSERT INTO tokens (token, user_id) VALUES (?,?)",
+          [encodedHash, userId],
+          function (error, results) {
+            if (error) throw error;
+
+            console.log("Encoded token stored successfully!");
+          }
+        );
+
+        const link = `http://localhost:5173/password-reset/${encodedHash}`;
+
+        // If local dev, populate text file with link.
+        const filename = "password-reset-email-body.txt";
+        await clearFile(filename);
+        await appendToFile(filename, link);
+
+        // If production, send email.
+        res.status(200).send({ message: "Email sent!" });
+
+        connection.end();
+      });
+    } else {
+      res.status(200).send({ message: "Email does not exist in database." });
+
+      connection.end();
+    }
+  });
+});
+
+app.post("/token-validation", express.text(), (req, res) => {
+  // Token arrives decoded but is stored encoded.
+  const encodedToken = encodeURIComponent(req.body);
+
+  const connection = mysql.createConnection({
+    host: HOST,
+    user: USER,
+    password: DB_PASSWORD,
+    database: DB,
+  });
+
+  connection.connect((error) => {
+    if (error) {
+      console.error("Error connecting to database:", error);
+
+      return;
+    }
+
+    console.log("Connected to the database.");
+  });
+
+  const query = `SELECT * FROM tokens WHERE token = "${encodedToken}"`;
+
+  connection.query(query, function (error, results) {
+    if (error) throw error;
+
+    if (results.length !== 0) {
+      res
+        .status(200)
+        .send({ message: "User is authorized", isAuthorized: true });
+    } else {
+      res.status(401).send("User not authorized.");
+    }
+  });
+
+  connection.end();
+});
+
+app.post("/reset-password", upload.none(), (req, res) => {
+  const {
+    password,
+    "password-confirmation": passwordConfirmation,
+    token,
+  } = req.body;
+
+  if (password !== passwordConfirmation) {
+    throw new Error({ message: "Passwords do not match." });
+  }
+
+  const connection = mysql.createConnection({
+    host: HOST,
+    user: USER,
+    password: DB_PASSWORD,
+    database: DB,
+  });
+
+  connection.connect((error) => {
+    if (error) {
+      console.error("Error connecting to database:", error);
+
+      return;
+    }
+
+    console.log("Connected to the database.");
+  });
+
+  connection.query(
+    `SELECT * from tokens WHERE token="${encodeURIComponent(token)}"`,
+    function (error, results) {
+      if (error) throw error;
+
+      if (results.length === 0) {
+        throw new Error({ message: "Token not found" });
+      }
+
+      const userId = results[0].user_id;
+
+      bcrypt.hash(password, saltRounds, function (error, hash) {
+        const updatePasswordQuery = `
+        UPDATE users
+        SET password = '${hash}' 
+        WHERE user_id = '${userId}';
+        `;
+
+        connection.query(updatePasswordQuery, function (error, results) {
+          if (error) throw error;
+
+          console.log(
+            `Password updated for user with id ${userId}`,
+            results.message
+          );
+        });
+
+        const deleteTokenQuery = `
+        DELETE FROM tokens
+        WHERE token = "${encodeURIComponent(token)}";
+        `;
+
+        connection.query(deleteTokenQuery, function (error, results) {
+          if (error) throw error;
+
+          console.log(`Token ${encodeURIComponent(token)} deleted`);
+
+          res.status(200).send("Password updated.");
+
+          connection.end();
+        });
+      });
+    }
+  );
 });
 
 app.listen(port, () => {

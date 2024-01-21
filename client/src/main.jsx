@@ -10,6 +10,12 @@ import Create, { action as createAction } from "./routes/create-view";
 import Register, { action as registerAction } from "./routes/register-view";
 import Login, { action as loginAction } from "./routes/login-view";
 import Profile from "./routes/profile-view";
+import RequestReset, {
+  action as requestResetAction,
+} from "./routes/request-reset-view";
+import PasswordReset, {
+  action as passwordResetAction,
+} from "./routes/password-reset";
 import ErrorPage from "./error-page";
 
 import "./index.css";
@@ -46,6 +52,16 @@ const router = createBrowserRouter([
       {
         path: "profile",
         element: <Profile />,
+      },
+      {
+        path: "login/request-password-reset",
+        element: <RequestReset />,
+        action: requestResetAction,
+      },
+      {
+        path: "password-reset/:token",
+        element: <PasswordReset />,
+        action: passwordResetAction,
       },
     ],
   },
