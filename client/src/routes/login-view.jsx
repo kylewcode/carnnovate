@@ -7,6 +7,7 @@ export async function action({ request }) {
   const response = await fetch("http://localhost:3000/login", {
     method: "POST",
     body: formData,
+    credentials: "include",
   });
 
   const auth = await response.json();

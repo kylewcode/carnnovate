@@ -18,6 +18,7 @@ const saltRounds = 10;
 const corsOptions = {
   origin: "http://localhost:5173",
   optionsSuccessStatus: 200,
+  credentials: true,
 };
 
 app.use(cors(corsOptions));
@@ -26,6 +27,9 @@ app.use(
     secret: LONG_RANDOM_STRING,
     resave: false,
     saveUninitialized: false,
+    cookie: {
+      secure: false,
+    },
   })
 );
 
@@ -213,7 +217,12 @@ app.post("/create", upload.none(), (req, res) => {
 
   // Existing user id must be inserted or database update will fail due to foreign key restrains
   // on recipes table for user_id.
-  const userId = "1";
+
+  // (Will log an object with properties set during login. 35%)(False)
+  console.log("create route session info: ", req.session);
+  // (Will log undefined. 100%)(True)
+  console.log(req.session.user_id);
+  const userId = req.session.user_id;
 
   const connection = mysql.createConnection({
     host: HOST,
@@ -225,6 +234,7 @@ app.post("/create", upload.none(), (req, res) => {
   connection.connect((error) => {
     if (error) {
       console.error("Error connecting to database:", error);
+
       return;
     }
 
@@ -232,15 +242,23 @@ app.post("/create", upload.none(), (req, res) => {
   });
 
   const query = `
-  INSERT INTO recipes (user_id, title, description, ingredients, time)
-  VALUES (?, ?, ?, ?, ?)
+  INSERT INTO recipes (user_id, title, description, ingredients, time, instructions)
+  VALUES (?, ?, ?, ?, ?, ?)
   `;
 
-  const recipeAttributes = [userId, title, description, ingredients, time];
+  const recipeAttributes = [
+    userId,
+    title,
+    description,
+    ingredients,
+    time,
+    instructions,
+  ];
 
   connection.query(query, recipeAttributes, function (error, results) {
     if (error) throw error;
-    res.send(results);
+
+    res.status(200).send("Recipe submitted");
   });
 
   connection.end();

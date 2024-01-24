@@ -6,6 +6,7 @@ export async function action({ request }) {
   await fetch("http://localhost:3000/create", {
     method: "POST",
     body: formData,
+    credentials: "include",
   });
 
   return null;
