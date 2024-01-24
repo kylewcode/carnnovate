@@ -105,6 +105,48 @@ app.get("/logout", upload.none(), (req, res) => {
   });
 });
 
+app.get("/get-user", upload.none(), (req, res) => {
+  // Get current user name, profile image, recipes, and favorites
+  const username = req.session.username;
+  const userId = req.session.user_id;
+  console.log("username: ", username);
+  console.log("userId: ", userId);
+
+  const connection = mysql.createConnection({
+    host: HOST,
+    user: USER,
+    password: DB_PASSWORD,
+    database: DB,
+  });
+
+  connection.connect((error) => {
+    if (error) {
+      console.error("Error connecting to database:", error);
+
+      return;
+    }
+
+    console.log("Connected to the database.");
+  });
+
+  const query = `
+  SELECT title from recipes
+  WHERE user_id="${userId}";
+  `;
+
+  connection.query(query, (error, results) => {
+    if (error) throw error;
+
+    // (Type is object 50%)(True)
+    console.log(typeof results);
+    // (results will be an array 50%)()
+    console.log(Array.isArray(results));
+    res.status(200).send({ username: username, recipes: results });
+  });
+
+  connection.end();
+});
+
 app.post("/register", upload.none(), (req, res) => {
   console.log("registering user...");
 
