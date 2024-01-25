@@ -17,7 +17,7 @@ export default function Profile() {
     getUser();
   }, []);
 
-  if (user) {
+  if (user.username) {
     return (
       <div>
         <h2>{user.username}</h2>
