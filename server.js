@@ -105,12 +105,9 @@ app.get("/logout", upload.none(), (req, res) => {
   });
 });
 
-app.get("/get-user", upload.none(), (req, res) => {
-  // Get current user name, profile image, recipes, and favorites
+app.get("/get-user", (req, res) => {
   const username = req.session.username;
   const userId = req.session.user_id;
-  console.log("username: ", username);
-  console.log("userId: ", userId);
 
   const connection = mysql.createConnection({
     host: HOST,
@@ -130,18 +127,47 @@ app.get("/get-user", upload.none(), (req, res) => {
   });
 
   const query = `
-  SELECT title from recipes
+  SELECT recipe_id, title from recipes
   WHERE user_id="${userId}";
   `;
 
   connection.query(query, (error, results) => {
     if (error) throw error;
 
-    // (Type is object 50%)(True)
-    console.log(typeof results);
-    // (results will be an array 50%)()
-    console.log(Array.isArray(results));
     res.status(200).send({ username: username, recipes: results });
+  });
+
+  connection.end();
+});
+
+app.get("/get-recipe-details/:recipeId", (req, res) => {
+  console.log("Getting recipe details...");
+  const connection = mysql.createConnection({
+    host: HOST,
+    user: USER,
+    password: DB_PASSWORD,
+    database: DB,
+  });
+
+  connection.connect((error) => {
+    if (error) {
+      console.error("Error connecting to database:", error);
+      return;
+    }
+
+    console.log("Connected to the database.");
+  });
+
+  const recipeId = req.params.recipeId;
+  const query = `
+  SELECT * from recipes
+  WHERE recipe_id = "${recipeId}";
+  `;
+
+  connection.query(query, (error, results) => {
+    if (error) throw error;
+
+    res.status(200).send(results[0]);
   });
 
   connection.end();
@@ -256,14 +282,6 @@ app.post("/login", upload.none(), (req, res) => {
 
 app.post("/create", upload.none(), (req, res) => {
   const { title, description, ingredients, instructions, time } = req.body;
-
-  // Existing user id must be inserted or database update will fail due to foreign key restrains
-  // on recipes table for user_id.
-
-  // (Will log an object with properties set during login. 35%)(False)
-  console.log("create route session info: ", req.session);
-  // (Will log undefined. 100%)(True)
-  console.log(req.session.user_id);
   const userId = req.session.user_id;
 
   const connection = mysql.createConnection({
@@ -483,6 +501,55 @@ app.post("/reset-password", upload.none(), (req, res) => {
       });
     }
   );
+});
+
+app.post("/update-recipe/:recipeId", upload.none(), (req, res) => {
+  const { title, ingredients, description, time, instructions } = req.body;
+  const { recipeId } = req.params;
+
+  const connection = mysql.createConnection({
+    host: HOST,
+    user: USER,
+    password: DB_PASSWORD,
+    database: DB,
+  });
+
+  connection.connect((error) => {
+    if (error) {
+      console.error("Error connecting to database:", error);
+
+      return;
+    }
+
+    console.log("Connected to the database.");
+  });
+
+  const query = `
+  UPDATE recipes 
+  SET title = ?, 
+  ingredients = ?, 
+  description = ?, 
+  time = ?, 
+  instructions = ? 
+  WHERE (recipe_id = ?);
+  `;
+
+  const recipeDetails = [
+    title,
+    ingredients,
+    description,
+    time,
+    instructions,
+    recipeId,
+  ];
+
+  connection.query(query, recipeDetails, (error, results) => {
+    if (error) throw error;
+
+    res.status(200).send("Recipe updated.");
+  });
+
+  connection.end();
 });
 
 app.listen(port, () => {

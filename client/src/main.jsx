@@ -16,6 +16,9 @@ import RequestReset, {
 import PasswordReset, {
   action as passwordResetAction,
 } from "./routes/password-reset";
+import EditRecipe, {
+  action as editRecipeAction,
+} from "./routes/edit-recipe-view";
 import ErrorPage from "./error-page";
 
 import "./index.css";
@@ -62,6 +65,11 @@ const router = createBrowserRouter([
         path: "password-reset/:token",
         element: <PasswordReset />,
         action: passwordResetAction,
+      },
+      {
+        path: "profile/edit-recipe/:recipeId",
+        element: <EditRecipe />,
+        action: editRecipeAction,
       },
     ],
   },

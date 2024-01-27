@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 
 export default function Profile() {
   const [user, setUser] = useState({});
@@ -25,7 +26,13 @@ export default function Profile() {
         <p>Recipes go here</p>
         <ul>
           {user.recipes.map((recipe, index) => {
-            return <li key={index}>{recipe.title}</li>;
+            return (
+              <li key={index}>
+                <Link to={`edit-recipe/${recipe.recipe_id}`}>
+                  {recipe.title}
+                </Link>
+              </li>
+            );
           })}
         </ul>
         <p>Favorites go here</p>
