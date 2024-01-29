@@ -83,13 +83,10 @@ app.get("/recipes", (req, res) => {
 });
 
 app.get("/auth", upload.none(), (req, res) => {
-  console.log("auth route");
-  console.log(req.session);
   if (req.session.user_id) {
-    console.log(req.session.user_id);
     res.status(200).send({ isAuthorized: true });
   } else {
-    res.status(500).send({ message: "Error authorizing user" });
+    res.status(401).send({ message: "Error authorizing user" });
   }
 });
 
@@ -171,6 +168,42 @@ app.get("/get-recipe-details/:recipeId", (req, res) => {
   });
 
   connection.end();
+});
+
+app.get("/get-comments/:recipeId", (req, res) => {
+  console.log("Getting comments...");
+  const recipeId = req.params.recipeId;
+  const connection = mysql.createConnection({
+    host: HOST,
+    user: USER,
+    password: DB_PASSWORD,
+    database: DB,
+  });
+
+  connection.connect((error) => {
+    if (error) {
+      console.error("Error connecting to database:", error);
+      return;
+    }
+
+    console.log("Connected to the database.");
+  });
+
+  const commentQuery = `
+    SELECT comments.text, users.user_name FROM comments
+    INNER JOIN users ON comments.user_id=users.user_id
+    WHERE recipe_id = ?;
+  `;
+
+  const commentVariables = [recipeId];
+
+  connection.query(commentQuery, commentVariables, (error, results) => {
+    if (error) throw error;
+
+    res.status(200).send(results);
+
+    connection.end();
+  });
 });
 
 app.post("/register", upload.none(), (req, res) => {
@@ -547,6 +580,45 @@ app.post("/update-recipe/:recipeId", upload.none(), (req, res) => {
     if (error) throw error;
 
     res.status(200).send("Recipe updated.");
+  });
+
+  connection.end();
+});
+
+app.post("/add-comment/:recipeId", upload.none(), (req, res) => {
+  console.log("Submitting comment...");
+
+  const recipeId = req.params.recipeId;
+  const userId = req.session.user_id;
+  const text = req.body.comment;
+
+  const connection = mysql.createConnection({
+    host: HOST,
+    user: USER,
+    password: DB_PASSWORD,
+    database: DB,
+  });
+
+  connection.connect((error) => {
+    if (error) {
+      console.error("Error connecting to database:", error);
+
+      return;
+    }
+
+    console.log("Connected to the database.");
+  });
+
+  const query = `
+    INSERT INTO comments (recipe_id, user_id, text)
+    VALUES (?, ?, ?);
+  `;
+  const commentDetails = [recipeId, userId, text];
+
+  connection.query(query, commentDetails, (error, results) => {
+    if (error) throw error;
+
+    res.status(200).send("Comment added.");
   });
 
   connection.end();

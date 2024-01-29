@@ -5,7 +5,7 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 
 import Root from "./routes/root";
 import Search from "./routes/search-view";
-import Detail from "./routes/detail-view";
+import Detail, { action as detailAction } from "./routes/detail-view";
 import Create, { action as createAction } from "./routes/create-view";
 import Register, { action as registerAction } from "./routes/register-view";
 import Login, { action as loginAction } from "./routes/login-view";
@@ -34,8 +34,9 @@ const router = createBrowserRouter([
         element: <Search />,
       },
       {
-        path: "search/detail/:recipe_id",
+        path: "search/detail/:recipeId",
         element: <Detail />,
+        action: detailAction,
       },
       {
         path: "create",
