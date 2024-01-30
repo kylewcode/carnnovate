@@ -17,6 +17,7 @@ export default function Detail() {
   const { state: recipe } = useLocation();
   const [isAuthorized, setIsAuthorized] = useState(false);
   const [recipeComments, setRecipeComments] = useState([]);
+  const [recipeFavorites, setRecipeFavorites] = useState([]);
   const recipeId = useParams().recipeId;
 
   useEffect(() => {
@@ -54,7 +55,24 @@ export default function Detail() {
     getComments();
   }, [recipeId]);
 
-  //   if user is authorized, show comment form and detail
+  useEffect(() => {
+    const getFavorites = async () => {
+      try {
+        const res = await fetch(
+          `http://localhost:3000/get-favorites/${recipeId}`,
+          { credentials: "include" }
+        );
+        const favorites = await res.json();
+
+        setRecipeFavorites(favorites);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    getFavorites();
+  }, [recipeId]);
+
   if (isAuthorized && recipe) {
     return (
       <>
@@ -66,6 +84,7 @@ export default function Detail() {
           <p>Instructions: {recipe.instructions}</p>
           <p>Time: {recipe.time}</p>
           <p>Votes: {recipe.votes}</p>
+          <p>Favorites: {recipeFavorites.length}</p>
         </div>
         <h2>Comments</h2>
         <Form method="post" encType="multipart/form-data">
@@ -89,7 +108,6 @@ export default function Detail() {
           : null}
       </>
     );
-    // else show only detail
   } else if (recipe) {
     return (
       <>
@@ -101,7 +119,9 @@ export default function Detail() {
           <p>Instructions: {recipe.instructions}</p>
           <p>Time: {recipe.time}</p>
           <p>Votes: {recipe.votes}</p>
+          <p>Favorites: {recipeFavorites.length}</p>
         </div>
+        <h2>Comments</h2>
         {recipeComments.length !== 0
           ? recipeComments.map((comment, index) => (
               <div key={index}>

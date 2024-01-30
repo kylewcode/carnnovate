@@ -206,6 +206,41 @@ app.get("/get-comments/:recipeId", (req, res) => {
   });
 });
 
+app.get("/get-favorites/:recipeId", (req, res) => {
+  console.log("Getting favorites...");
+  const recipeId = req.params.recipeId;
+  const connection = mysql.createConnection({
+    host: HOST,
+    user: USER,
+    password: DB_PASSWORD,
+    database: DB,
+  });
+
+  connection.connect((error) => {
+    if (error) {
+      console.error("Error connecting to database:", error);
+      return;
+    }
+
+    console.log("Connected to the database.");
+  });
+
+  const favoriteQuery = `
+    SELECT favorite_id FROM favorites
+    WHERE recipe_id = ?;
+  `;
+
+  const favoriteVariables = [recipeId];
+
+  connection.query(favoriteQuery, favoriteVariables, (error, results) => {
+    if (error) throw error;
+
+    res.status(200).send(results);
+  });
+
+  connection.end();
+});
+
 app.post("/register", upload.none(), (req, res) => {
   console.log("registering user...");
 
