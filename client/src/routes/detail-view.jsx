@@ -35,23 +35,30 @@ export default function Detail() {
     getFavorites(recipeId).then((favorites) => setRecipeFavorites(favorites));
   }, [recipeId]);
 
-  const handleClick = () => {
-    const favoriteRecipe = async () => {
-      const res = await fetch(
-        `http://localhost:3000/favorite-recipe/${recipeId}`,
-        {
-          credentials: "include",
-        }
-      );
-
-      if (res.ok) {
-        getFavorites(recipeId).then((favorites) =>
-          setRecipeFavorites(favorites)
-        );
+  const favoriteRecipe = async () => {
+    const res = await fetch(
+      `http://localhost:3000/favorite-recipe/${recipeId}`,
+      {
+        credentials: "include",
       }
-    };
+    );
 
-    favoriteRecipe();
+    if (res.ok) {
+      getFavorites(recipeId).then((favorites) => setRecipeFavorites(favorites));
+    }
+  };
+
+  const unfavoriteRecipe = async () => {
+    const res = await fetch(
+      `http://localhost:3000/unfavorite-recipe/${recipeId}`,
+      {
+        credentials: "include",
+      }
+    );
+
+    if (res.ok) {
+      getFavorites(recipeId).then((favorites) => setRecipeFavorites(favorites));
+    }
   };
 
   if (isAuthorized && recipe) {
@@ -67,8 +74,13 @@ export default function Detail() {
           <p>Votes: {recipe.votes}</p>
           <p>
             <span>
-              <button type="button" onClick={handleClick}>
+              <button type="button" onClick={() => favoriteRecipe()}>
                 Favorite this!
+              </button>
+            </span>
+            <span>
+              <button type="button" onClick={() => unfavoriteRecipe()}>
+                Unfavorite this!
               </button>
             </span>
             Favorites: {recipeFavorites.length}

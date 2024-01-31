@@ -278,6 +278,43 @@ app.get("/favorite-recipe/:recipeId", (req, res) => {
   connection.end();
 });
 
+app.get("/unfavorite-recipe/:recipeId", (req, res) => {
+  console.log("Unfavoriting recipe...");
+  const recipeId = req.params.recipeId;
+  const userId = req.session.user_id;
+
+  const connection = mysql.createConnection({
+    host: HOST,
+    user: USER,
+    password: DB_PASSWORD,
+    database: DB,
+  });
+
+  connection.connect((error) => {
+    if (error) {
+      console.error("Error connecting to database:", error);
+      return;
+    }
+
+    console.log("Connected to the database.");
+  });
+
+  const query = `
+  DELETE FROM favorites
+  WHERE recipe_id = ? AND user_id = ?
+  `;
+
+  const unfavoriteAttributes = [recipeId, userId];
+
+  connection.query(query, unfavoriteAttributes, (error, results) => {
+    if (error) throw error;
+
+    res.status(200).send("Recipe unfavorited.");
+  });
+
+  connection.end();
+});
+
 app.post("/register", upload.none(), (req, res) => {
   console.log("registering user...");
 
