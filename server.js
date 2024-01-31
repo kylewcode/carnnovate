@@ -82,11 +82,11 @@ app.get("/recipes", (req, res) => {
   connection.end();
 });
 
-app.get("/auth", upload.none(), (req, res) => {
+app.get("/auth", (req, res) => {
   if (req.session.user_id) {
     res.status(200).send({ isAuthorized: true });
   } else {
-    res.status(401).send({ message: "Error authorizing user" });
+    res.status(401).send({ isAuthorized: false });
   }
 });
 
@@ -236,6 +236,43 @@ app.get("/get-favorites/:recipeId", (req, res) => {
     if (error) throw error;
 
     res.status(200).send(results);
+  });
+
+  connection.end();
+});
+
+app.get("/favorite-recipe/:recipeId", (req, res) => {
+  console.log("Favoriting recipe...");
+  const recipeId = req.params.recipeId;
+  const userId = req.session.user_id;
+
+  const connection = mysql.createConnection({
+    host: HOST,
+    user: USER,
+    password: DB_PASSWORD,
+    database: DB,
+  });
+
+  connection.connect((error) => {
+    if (error) {
+      console.error("Error connecting to database:", error);
+      return;
+    }
+
+    console.log("Connected to the database.");
+  });
+
+  const query = `
+  INSERT INTO favorites (recipe_id, user_id) 
+  VALUES (?, ?);
+  `;
+
+  const favoriteAttributes = [recipeId, userId];
+
+  connection.query(query, favoriteAttributes, (error, results) => {
+    if (error) throw error;
+
+    res.status(200).send("Recipe favorited.");
   });
 
   connection.end();

@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { Form, useLocation, useParams } from "react-router-dom";
 
+import { getAuth, getComments, getFavorites } from "../utils/ajax";
+
 export async function action({ params, request }) {
   const formData = await request.formData();
 
@@ -14,64 +16,43 @@ export async function action({ params, request }) {
 }
 
 export default function Detail() {
-  const { state: recipe } = useLocation();
   const [isAuthorized, setIsAuthorized] = useState(false);
   const [recipeComments, setRecipeComments] = useState([]);
   const [recipeFavorites, setRecipeFavorites] = useState([]);
+
+  const { state: recipe } = useLocation();
   const recipeId = useParams().recipeId;
 
   useEffect(() => {
-    const getAuth = async () => {
-      try {
-        const res = await fetch("http://localhost:3000/auth", {
-          credentials: "include",
-        });
-        const auth = await res.json();
-
-        setIsAuthorized(auth.isAuthorized);
-      } catch (error) {
-        console.error(error);
-      }
-    };
-
-    getAuth();
+    getAuth().then((isAuthorized) => setIsAuthorized(isAuthorized));
   }, []);
 
   useEffect(() => {
-    const getComments = async () => {
-      try {
-        const res = await fetch(
-          `http://localhost:3000/get-comments/${recipeId}`,
-          { credentials: "include" }
-        );
-        const comments = await res.json();
-
-        setRecipeComments(comments);
-      } catch (error) {
-        console.error(error);
-      }
-    };
-
-    getComments();
+    getComments(recipeId).then((comments) => setRecipeComments(comments));
   }, [recipeId]);
 
   useEffect(() => {
-    const getFavorites = async () => {
-      try {
-        const res = await fetch(
-          `http://localhost:3000/get-favorites/${recipeId}`,
-          { credentials: "include" }
-        );
-        const favorites = await res.json();
+    getFavorites(recipeId).then((favorites) => setRecipeFavorites(favorites));
+  }, [recipeId]);
 
-        setRecipeFavorites(favorites);
-      } catch (error) {
-        console.error(error);
+  const handleClick = () => {
+    const favoriteRecipe = async () => {
+      const res = await fetch(
+        `http://localhost:3000/favorite-recipe/${recipeId}`,
+        {
+          credentials: "include",
+        }
+      );
+
+      if (res.ok) {
+        getFavorites(recipeId).then((favorites) =>
+          setRecipeFavorites(favorites)
+        );
       }
     };
 
-    getFavorites();
-  }, [recipeId]);
+    favoriteRecipe();
+  };
 
   if (isAuthorized && recipe) {
     return (
@@ -84,7 +65,14 @@ export default function Detail() {
           <p>Instructions: {recipe.instructions}</p>
           <p>Time: {recipe.time}</p>
           <p>Votes: {recipe.votes}</p>
-          <p>Favorites: {recipeFavorites.length}</p>
+          <p>
+            <span>
+              <button type="button" onClick={handleClick}>
+                Favorite this!
+              </button>
+            </span>
+            Favorites: {recipeFavorites.length}
+          </p>
         </div>
         <h2>Comments</h2>
         <Form method="post" encType="multipart/form-data">
