@@ -19,6 +19,7 @@ export default function Detail() {
   const [isAuthorized, setIsAuthorized] = useState(false);
   const [recipeComments, setRecipeComments] = useState([]);
   const [recipeFavorites, setRecipeFavorites] = useState([]);
+  const [userHasFavorited, setUserHasFavorited] = useState(false);
 
   const { state: recipe } = useLocation();
   const recipeId = useParams().recipeId;
@@ -32,7 +33,10 @@ export default function Detail() {
   }, [recipeId]);
 
   useEffect(() => {
-    getFavorites(recipeId).then((favorites) => setRecipeFavorites(favorites));
+    getFavorites(recipeId).then((data) => {
+      setRecipeFavorites(data.favorites);
+      setUserHasFavorited(data.favorited);
+    });
   }, [recipeId]);
 
   const favoriteRecipe = async () => {
@@ -44,7 +48,8 @@ export default function Detail() {
     );
 
     if (res.ok) {
-      getFavorites(recipeId).then((favorites) => setRecipeFavorites(favorites));
+      getFavorites(recipeId).then((data) => setRecipeFavorites(data.favorites));
+      setUserHasFavorited(true);
     }
   };
 
@@ -57,7 +62,8 @@ export default function Detail() {
     );
 
     if (res.ok) {
-      getFavorites(recipeId).then((favorites) => setRecipeFavorites(favorites));
+      getFavorites(recipeId).then((data) => setRecipeFavorites(data.favorites));
+      setUserHasFavorited(false);
     }
   };
 
@@ -73,16 +79,19 @@ export default function Detail() {
           <p>Time: {recipe.time}</p>
           <p>Votes: {recipe.votes}</p>
           <p>
-            <span>
-              <button type="button" onClick={() => favoriteRecipe()}>
-                Favorite this!
-              </button>
-            </span>
-            <span>
-              <button type="button" onClick={() => unfavoriteRecipe()}>
-                Unfavorite this!
-              </button>
-            </span>
+            {!userHasFavorited ? (
+              <span>
+                <button type="button" onClick={() => favoriteRecipe()}>
+                  Favorite this!
+                </button>
+              </span>
+            ) : (
+              <span>
+                <button type="button" onClick={() => unfavoriteRecipe()}>
+                  Unfavorite this!
+                </button>
+              </span>
+            )}
             Favorites: {recipeFavorites.length}
           </p>
         </div>

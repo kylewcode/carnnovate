@@ -225,6 +225,26 @@ app.get("/get-favorites/:recipeId", (req, res) => {
     console.log("Connected to the database.");
   });
 
+  // Only valid if user is logged in which is not always the case.
+  let userHasFavorited = false;
+
+  if (req.session.user_id) {
+    const userId = req.session.user_id;
+    const checkUserQuery = `
+    SELECT favorite_id FROM favorites
+    WHERE user_id = ? AND recipe_id = ?
+    `;
+    const checkUserVariables = [userId, recipeId];
+
+    connection.query(checkUserQuery, checkUserVariables, (error, results) => {
+      if (error) throw error;
+
+      if (results.length !== 0) {
+        userHasFavorited = true;
+      }
+    });
+  }
+
   const favoriteQuery = `
     SELECT favorite_id FROM favorites
     WHERE recipe_id = ?;
@@ -235,7 +255,7 @@ app.get("/get-favorites/:recipeId", (req, res) => {
   connection.query(favoriteQuery, favoriteVariables, (error, results) => {
     if (error) throw error;
 
-    res.status(200).send(results);
+    res.status(200).send({ favorites: results, favorited: userHasFavorited });
   });
 
   connection.end();
