@@ -225,7 +225,6 @@ app.get("/get-favorites/:recipeId", (req, res) => {
     console.log("Connected to the database.");
   });
 
-  // Only valid if user is logged in which is not always the case.
   let userHasFavorited = false;
 
   if (req.session.user_id) {
@@ -333,6 +332,59 @@ app.get("/unfavorite-recipe/:recipeId", (req, res) => {
   });
 
   connection.end();
+});
+
+app.get("/vote/:recipeId", (req, res) => {
+  console.log("Voting on recipe...");
+  const recipeId = req.params.recipeId;
+  const userId = req.session.user_id;
+
+  const connection = mysql.createConnection({
+    host: HOST,
+    user: USER,
+    password: DB_PASSWORD,
+    database: DB,
+  });
+
+  connection.connect((error) => {
+    if (error) {
+      console.error("Error connecting to database:", error);
+      return;
+    }
+
+    console.log("Connected to the database.");
+  });
+
+  const query = `
+  INSERT INTO votes (recipe_id, user_id)
+  VALUES (?, ?)
+  `;
+
+  const variables = [recipeId, userId];
+
+  connection.query(query, variables, (error, results) => {
+    if (error) throw error;
+
+    // Get current vote count
+    const voteCountQuery = `
+    SELECT COUNT(*) FROM votes
+    WHERE recipe_id=?
+    `;
+    const voteCountVariables = [recipeId];
+
+    connection.query(voteCountQuery, voteCountVariables, (error, results) => {
+      if (error) throw error;
+
+      res
+        .status(200)
+        .send({
+          message: "Recipe voted on.",
+          voteCount: results[0]["COUNT(*)"],
+        });
+    });
+
+    connection.end();
+  });
 });
 
 app.post("/register", upload.none(), (req, res) => {

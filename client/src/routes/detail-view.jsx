@@ -16,12 +16,15 @@ export async function action({ params, request }) {
 }
 
 export default function Detail() {
+  const { state: recipe } = useLocation();
+
   const [isAuthorized, setIsAuthorized] = useState(false);
   const [recipeComments, setRecipeComments] = useState([]);
   const [recipeFavorites, setRecipeFavorites] = useState([]);
   const [userHasFavorited, setUserHasFavorited] = useState(false);
+  const [votes, setVotes] = useState(recipe.votes);
+  const [userHasVoted, setUserHasVoted] = useState(false);
 
-  const { state: recipe } = useLocation();
   const recipeId = useParams().recipeId;
 
   useEffect(() => {
@@ -67,6 +70,19 @@ export default function Detail() {
     }
   };
 
+  const voteForRecipe = async () => {
+    const res = await fetch(`http://localhost:3000/vote/${recipeId}`, {
+      credentials: "include",
+    });
+
+    const vote = await res.json();
+    const voteCount = vote.voteCount;
+
+    if (res.ok) {
+      setVotes(voteCount);
+    }
+  };
+
   if (isAuthorized && recipe) {
     return (
       <>
@@ -77,7 +93,20 @@ export default function Detail() {
           <p>Ingredients {recipe.ingredients}</p>
           <p>Instructions: {recipe.instructions}</p>
           <p>Time: {recipe.time}</p>
-          <p>Votes: {recipe.votes}</p>
+          <p>
+            {!userHasVoted ? (
+              <span>
+                <button type="button" onClick={() => voteForRecipe()}>
+                  Vote for recipe
+                </button>
+              </span>
+            ) : (
+              <span>
+                <button type="button">Unvote recipe</button>
+              </span>
+            )}
+            Votes: {votes}
+          </p>
           <p>
             {!userHasFavorited ? (
               <span>
@@ -127,7 +156,7 @@ export default function Detail() {
           <p>Ingredients {recipe.ingredients}</p>
           <p>Instructions: {recipe.instructions}</p>
           <p>Time: {recipe.time}</p>
-          <p>Votes: {recipe.votes}</p>
+          <p>Votes: {votes}</p>
           <p>Favorites: {recipeFavorites.length}</p>
         </div>
         <h2>Comments</h2>
