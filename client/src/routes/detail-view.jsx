@@ -80,6 +80,21 @@ export default function Detail() {
 
     if (res.ok) {
       setVotes(voteCount);
+      setUserHasVoted(true);
+    }
+  };
+
+  const unvoteRecipe = async () => {
+    const res = await fetch(`http://localhost:3000/unvote/${recipeId}`, {
+      credentials: "include",
+    });
+
+    const vote = await res.json();
+    const voteCount = vote.voteCount;
+
+    if (res.ok) {
+      setVotes(voteCount);
+      setUserHasVoted(false);
     }
   };
 
@@ -102,7 +117,9 @@ export default function Detail() {
               </span>
             ) : (
               <span>
-                <button type="button">Unvote recipe</button>
+                <button type="button" onClick={() => unvoteRecipe()}>
+                  Unvote recipe
+                </button>
               </span>
             )}
             Votes: {votes}

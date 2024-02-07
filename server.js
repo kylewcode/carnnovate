@@ -365,7 +365,6 @@ app.get("/vote/:recipeId", (req, res) => {
   connection.query(query, variables, (error, results) => {
     if (error) throw error;
 
-    // Get current vote count
     const voteCountQuery = `
     SELECT COUNT(*) FROM votes
     WHERE recipe_id=?
@@ -375,12 +374,60 @@ app.get("/vote/:recipeId", (req, res) => {
     connection.query(voteCountQuery, voteCountVariables, (error, results) => {
       if (error) throw error;
 
-      res
-        .status(200)
-        .send({
-          message: "Recipe voted on.",
-          voteCount: results[0]["COUNT(*)"],
-        });
+      res.status(200).send({
+        message: "Recipe voted on.",
+        voteCount: results[0]["COUNT(*)"],
+      });
+    });
+
+    connection.end();
+  });
+});
+
+app.get("/unvote/:recipeId", (req, res) => {
+  console.log("Removing vote from recipe...");
+  const recipeId = req.params.recipeId;
+  const userId = req.session.user_id;
+
+  const connection = mysql.createConnection({
+    host: HOST,
+    user: USER,
+    password: DB_PASSWORD,
+    database: DB,
+  });
+
+  connection.connect((error) => {
+    if (error) {
+      console.error("Error connecting to database:", error);
+      return;
+    }
+
+    console.log("Connected to the database.");
+  });
+
+  const query = `
+  DELETE FROM votes
+  WHERE recipe_id = ? AND user_id = ?
+  `;
+
+  const variables = [recipeId, userId];
+
+  connection.query(query, variables, (error, results) => {
+    if (error) throw error;
+
+    const voteCountQuery = `
+    SELECT COUNT(*) FROM votes
+    WHERE recipe_id=?
+    `;
+    const voteCountVariables = [recipeId];
+
+    connection.query(voteCountQuery, voteCountVariables, (error, results) => {
+      if (error) throw error;
+
+      res.status(200).send({
+        message: "Vote removed.",
+        voteCount: results[0]["COUNT(*)"],
+      });
     });
 
     connection.end();
