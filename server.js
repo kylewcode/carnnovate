@@ -11,6 +11,17 @@ const app = express();
 const port = 3000;
 const mysql = require("mysql");
 const session = require("express-session");
+const MySQLStore = require("express-mysql-session")(session);
+
+const storeOptions = {
+  host: HOST,
+  port: 3306,
+  user: USER,
+  password: DB_PASSWORD,
+  database: DB,
+};
+
+const sessionStore = new MySQLStore(storeOptions);
 
 const bcrypt = require("bcrypt");
 const saltRounds = 10;
@@ -25,6 +36,7 @@ app.use(cors(corsOptions));
 app.use(
   session({
     secret: LONG_RANDOM_STRING,
+    store: sessionStore,
     resave: false,
     saveUninitialized: false,
     cookie: {
@@ -35,6 +47,11 @@ app.use(
     },
   })
 );
+
+sessionStore
+  .onReady()
+  .then(() => console.log("MySQLStore ready"))
+  .catch((error) => console.error(error));
 
 app.get("/", (req, res) => {
   req.session.username = "Kyle";
