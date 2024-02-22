@@ -11,6 +11,15 @@ export const getAuth = async () => {
   }
 };
 
+export const getUser = async () => {
+  const res = await fetch("http://localhost:3000/get-user", {
+    credentials: "include",
+  });
+  const user = await res.json();
+
+  return user;
+};
+
 export const getComments = async (recipeId) => {
   try {
     const res = await fetch(`http://localhost:3000/get-comments/${recipeId}`, {

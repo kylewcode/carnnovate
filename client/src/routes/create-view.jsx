@@ -1,4 +1,7 @@
-import { Form } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Form, Navigate } from "react-router-dom";
+
+import { getAuth } from "../utils/ajax";
 
 export async function action({ request }) {
   const formData = await request.formData();
@@ -13,53 +16,79 @@ export async function action({ request }) {
 }
 
 export default function Create() {
-  return (
-    <Form method="post" encType="multipart/form-data">
-      <label htmlFor="title">Title</label>
-      <input
-        type="text"
-        name="title"
-        id="title"
-        defaultValue="Bacon-wrapped Shrimp"
-      />
+  const [authorization, setAuthorization] = useState("authorizing");
 
-      <label htmlFor="image">Upload image</label>
-      <input type="file" name="image" id="image" />
+  useEffect(() => {
+    getAuth().then((isAuthorized) => {
+      if (isAuthorized) {
+        setAuthorization("authorized");
+      } else {
+        setAuthorization("unauthorized");
+      }
+    });
+  }, []);
 
-      <label htmlFor="description">Description</label>
-      <textarea
-        name="description"
-        id="description"
-        cols="30"
-        rows="10"
-        placeholder="Enter a description..."
-        defaultValue="This is a description."
-      ></textarea>
+  if (authorization === "authorized") {
+    return (
+      <Form method="post" encType="multipart/form-data">
+        <label htmlFor="title">Title</label>
+        <input
+          type="text"
+          name="title"
+          id="title"
+          defaultValue="Bacon-wrapped Shrimp"
+        />
 
-      <label htmlFor="ingredients">Ingredients</label>
-      <textarea
-        name="ingredients"
-        id="ingredients"
-        cols="30"
-        rows="10"
-        placeholder="Enter ingredients with a new line for each ingredient."
-        defaultValue="These are ingredients."
-      ></textarea>
+        <label htmlFor="image">Upload image</label>
+        <input type="file" name="image" id="image" />
 
-      <label htmlFor="instructions">Instructions</label>
-      <textarea
-        name="instructions"
-        id="instructions"
-        cols="30"
-        rows="10"
-        placeholder="Enter instructions..."
-        defaultValue="These are instructions."
-      ></textarea>
+        <label htmlFor="description">Description</label>
+        <textarea
+          name="description"
+          id="description"
+          cols="30"
+          rows="10"
+          placeholder="Enter a description..."
+          defaultValue="This is a description."
+        ></textarea>
 
-      <label htmlFor="time">Time (in minutes)</label>
-      <input type="number" name="time" id="time" defaultValue="30" />
+        <label htmlFor="ingredients">Ingredients</label>
+        <textarea
+          name="ingredients"
+          id="ingredients"
+          cols="30"
+          rows="10"
+          placeholder="Enter ingredients with a new line for each ingredient."
+          defaultValue="These are ingredients."
+        ></textarea>
 
-      <button type="submit">Submit</button>
-    </Form>
-  );
+        <label htmlFor="instructions">Instructions</label>
+        <textarea
+          name="instructions"
+          id="instructions"
+          cols="30"
+          rows="10"
+          placeholder="Enter instructions..."
+          defaultValue="These are instructions."
+        ></textarea>
+
+        <label htmlFor="time">Time (in minutes)</label>
+        <input type="number" name="time" id="time" defaultValue="30" />
+
+        <button type="submit">Submit</button>
+      </Form>
+    );
+  }
+
+  if (authorization === "unauthorized") {
+    return (
+      <div>
+        <Navigate to="/login" replace />;
+      </div>
+    );
+  }
+
+  if (authorization === "authorizing") {
+    return <div>Authorizing...</div>;
+  }
 }

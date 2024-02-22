@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
-import { Form, useParams } from "react-router-dom";
+import { Form, useParams, Navigate } from "react-router-dom";
+
+import { getAuth } from "../utils/ajax";
 
 export async function action({ params, request }) {
   const formData = await request.formData();
@@ -15,6 +17,7 @@ export async function action({ params, request }) {
 
 export default function EditRecipe() {
   const [recipeDetails, setRecipeDetails] = useState({});
+  const [authorization, setAuthorization] = useState("authorizing");
   const recipeId = useParams().recipeId;
 
   useEffect(() => {
@@ -30,62 +33,86 @@ export default function EditRecipe() {
     getRecipeDetails();
   }, [recipeId]);
 
-  if (!recipeDetails.title) {
-    return <div>Loading...</div>;
+  useEffect(() => {
+    getAuth().then((isAuthorized) => {
+      if (isAuthorized) {
+        setAuthorization("authorized");
+      } else {
+        setAuthorization("unauthorized");
+      }
+    });
+  }, []);
+
+  if (authorization === "authorized") {
+    if (!recipeDetails.title) {
+      return <div>Loading...</div>;
+    }
+
+    return (
+      <>
+        <h2>Edit Recipe</h2>
+        <Form method="post" encType="multipart/form-data">
+          <label htmlFor="title">Title</label>
+          <input
+            type="text"
+            name="title"
+            id="title"
+            defaultValue={recipeDetails.title}
+          />
+
+          <label htmlFor="image">Upload image</label>
+          <input type="file" name="image" id="image" />
+
+          <label htmlFor="description">Description</label>
+          <textarea
+            name="description"
+            id="description"
+            cols="30"
+            rows="10"
+            defaultValue={recipeDetails.description}
+          ></textarea>
+
+          <label htmlFor="ingredients">Ingredients</label>
+          <textarea
+            name="ingredients"
+            id="ingredients"
+            cols="30"
+            rows="10"
+            defaultValue={recipeDetails.ingredients}
+          ></textarea>
+
+          <label htmlFor="instructions">Instructions</label>
+          <textarea
+            name="instructions"
+            id="instructions"
+            cols="30"
+            rows="10"
+            defaultValue={recipeDetails.instructions}
+          ></textarea>
+
+          <label htmlFor="time">Time (in minutes)</label>
+          <input
+            type="number"
+            name="time"
+            id="time"
+            defaultValue={recipeDetails.time}
+          />
+
+          <button type="submit">Update recipe</button>
+        </Form>
+      </>
+    );
   }
 
-  return (
-    <>
-      <h2>Edit Recipe</h2>
-      <Form method="post" encType="multipart/form-data">
-        <label htmlFor="title">Title</label>
-        <input
-          type="text"
-          name="title"
-          id="title"
-          defaultValue={recipeDetails.title}
-        />
+  if (authorization === "unauthorized") {
+    return (
+      <div>
+        <Navigate to="/login" replace />;
+      </div>
+    );
+  }
 
-        <label htmlFor="image">Upload image</label>
-        <input type="file" name="image" id="image" />
-
-        <label htmlFor="description">Description</label>
-        <textarea
-          name="description"
-          id="description"
-          cols="30"
-          rows="10"
-          defaultValue={recipeDetails.description}
-        ></textarea>
-
-        <label htmlFor="ingredients">Ingredients</label>
-        <textarea
-          name="ingredients"
-          id="ingredients"
-          cols="30"
-          rows="10"
-          defaultValue={recipeDetails.ingredients}
-        ></textarea>
-
-        <label htmlFor="instructions">Instructions</label>
-        <textarea
-          name="instructions"
-          id="instructions"
-          cols="30"
-          rows="10"
-          defaultValue={recipeDetails.instructions}
-        ></textarea>
-
-        <label htmlFor="time">Time (in minutes)</label>
-        <input
-          type="number"
-          name="time"
-          id="time"
-          defaultValue={recipeDetails.time}
-        />
-
-        <button type="submit">Update recipe</button>
-      </Form>
-    </>
-  );
+  if (authorization === "authorizing") {
+    return <div>Authorizing...</div>;
+  }
 }
