@@ -18,9 +18,9 @@ export default function Root() {
   //   authUser();
   // }, []);
 
-  const handleClick = async () => {
+  const handleClick = () => {
     setIsLoggedIn(false);
-    await fetch("http://localhost:3000/logout")
+    fetch("http://localhost:3000/logout", { credentials: "include" })
       .then((response) => response.json())
       .then((json) => console.log(json.message));
   };

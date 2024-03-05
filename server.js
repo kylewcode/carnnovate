@@ -331,8 +331,6 @@ app.post("/login", upload.none(), (req, res) => {
         req.session.email = email;
         req.session.username = username;
 
-        console.log("session", req.session);
-
         res.status(200).send({ message: "User logged in", isAuthorized: true });
       } else {
         res
