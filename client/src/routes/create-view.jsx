@@ -1,7 +1,4 @@
-import { useEffect, useState } from "react";
-import { Form, Navigate } from "react-router-dom";
-
-import { getAuth } from "../utils/ajax";
+import { Form, Navigate, useOutletContext } from "react-router-dom";
 
 export async function action({ request }) {
   const formData = await request.formData();
@@ -16,17 +13,7 @@ export async function action({ request }) {
 }
 
 export default function Create() {
-  const [authorization, setAuthorization] = useState("authorizing");
-
-  useEffect(() => {
-    getAuth().then((isAuthorized) => {
-      if (isAuthorized) {
-        setAuthorization("authorized");
-      } else {
-        setAuthorization("unauthorized");
-      }
-    });
-  }, []);
+  const [authorization] = useOutletContext();
 
   if (authorization === "authorized") {
     return (

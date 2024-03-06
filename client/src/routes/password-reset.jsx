@@ -15,7 +15,7 @@ export async function action({ request, params }) {
   await fetch("http://localhost:3000/reset-password", {
     method: "POST",
     body: formData,
-  }).then((res) => {
+  }).then(() => {
     window.alert("Password updated");
   });
 
@@ -23,11 +23,11 @@ export async function action({ request, params }) {
 }
 
 export default function PasswordReset() {
-  const [isAuthorized, setIsAuthorized] = useState(false);
+  const [tokenIsValid, setTokenIsValid] = useState(false);
   const { token } = useParams();
 
   useEffect(() => {
-    const authorizeUser = async (token) => {
+    const validateUser = async (token) => {
       const res = await fetch("http://localhost:3000/token-validation", {
         method: "POST",
         body: token,
@@ -35,15 +35,19 @@ export default function PasswordReset() {
           "Content-Type": "text/plain",
         },
       });
-
       const auth = await res.json();
-      setIsAuthorized(auth.isAuthorized);
+
+      setTokenIsValid(auth.isAuthorized);
     };
 
-    authorizeUser(token);
+    validateUser(token);
   }, [token]);
 
-  if (isAuthorized) {
+  if (!tokenIsValid) {
+    return <div>Validating token...</div>;
+  }
+
+  if (tokenIsValid) {
     return (
       <Form method="post" encType="multipart/form-data">
         <label htmlFor="password">Enter a new password</label>
@@ -60,6 +64,4 @@ export default function PasswordReset() {
       </Form>
     );
   }
-
-  return null;
 }

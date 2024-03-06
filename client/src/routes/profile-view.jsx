@@ -1,41 +1,32 @@
 import { useEffect, useState } from "react";
-import { Link, Navigate } from "react-router-dom";
+import { Link, Navigate, useOutletContext } from "react-router-dom";
 
-import { getAuth, getUser } from "../utils/ajax";
+import { getUser } from "../utils/ajax";
 
 export default function Profile() {
   const userInit = {
     username: "",
     recipes: [],
     favorites: [],
-    authorization: "authorizing",
   };
 
   const [user, setUser] = useState(userInit);
+  const [authorization, setAuthorization] = useOutletContext();
 
   useEffect(() => {
-    getAuth()
-      .then((isAuthorized) => {
-        if (isAuthorized) {
-          return getUser();
-        }
-
-        setUser((prevUser) => ({ ...prevUser, authorization: "unauthorized" }));
-      })
-      .then((user) => {
-        if (user) {
-          // Server is currently not returning user favorites.
-          setUser((prevUser) => ({
-            ...prevUser,
-            username: user.username,
-            recipes: user.recipes,
-            authorization: "authorized",
-          }));
-        }
+    if (authorization === "authorized") {
+      getUser().then((user) => {
+        // Server is currently not returning user favorites.
+        setUser((prevUser) => ({
+          ...prevUser,
+          username: user.username,
+          recipes: user.recipes,
+        }));
       });
-  }, []);
+    }
+  }, [authorization]);
 
-  if (user.authorization === "authorized") {
+  if (authorization === "authorized") {
     if (user.username) {
       return (
         <div>
@@ -65,7 +56,7 @@ export default function Profile() {
     }
   }
 
-  if (user.authorization === "unauthorized") {
+  if (authorization === "unauthorized") {
     return (
       <div>
         <Navigate to="/login" replace />;
@@ -73,7 +64,7 @@ export default function Profile() {
     );
   }
 
-  if (user.authorization === "authorizing") {
+  if (authorization === "authorizing") {
     return <div>Authorizing...</div>;
   }
 }

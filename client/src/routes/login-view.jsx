@@ -1,5 +1,11 @@
 import { useEffect } from "react";
-import { Form, useActionData, useOutletContext, Link } from "react-router-dom";
+import {
+  Form,
+  useActionData,
+  useOutletContext,
+  Link,
+  Navigate,
+} from "react-router-dom";
 
 export async function action({ request }) {
   const formData = await request.formData();
@@ -16,29 +22,36 @@ export async function action({ request }) {
 }
 
 export default function Login() {
-  const [isLoggedIn, setIsLoggedIn] = useOutletContext();
+  const [authorization, setAuthorization] = useOutletContext();
   const isAuthorized = useActionData();
 
   useEffect(() => {
-    if (isAuthorized === undefined) {
-      setIsLoggedIn(false);
+    if (isAuthorized) {
+      setAuthorization("authorized");
     } else {
-      setIsLoggedIn(isAuthorized);
+      setAuthorization("unauthorized");
     }
-  }, [setIsLoggedIn, isAuthorized]);
+  }, [setAuthorization, isAuthorized]);
 
-  return (
-    <>
-      <Form method="post" encType="multipart/form-data">
-        <label htmlFor="username">User Name</label>
-        <input type="text" id="username" name="username" />
+  if (authorization === "unauthorized" || authorization === "authorizing") {
+    return (
+      <>
+        <Form method="post" encType="multipart/form-data">
+          <label htmlFor="username">User Name</label>
+          <input type="text" id="username" name="username" />
 
-        <label htmlFor="password">Password</label>
-        <input type="password" name="password" id="password" />
+          <label htmlFor="password">Password</label>
+          <input type="password" name="password" id="password" />
 
-        <button type="submit">Login</button>
-      </Form>
-      <Link to={`request-password-reset`}>Forgot/Reset Password</Link>
-    </>
-  );
+          <button type="submit">Login</button>
+        </Form>
+
+        <Link to={`request-password-reset`}>Forgot/Reset Password</Link>
+      </>
+    );
+  }
+
+  if (authorization === "authorized") {
+    return <Navigate to="/profile" replace />;
+  }
 }

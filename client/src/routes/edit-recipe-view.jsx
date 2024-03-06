@@ -1,7 +1,5 @@
 import { useState, useEffect } from "react";
-import { Form, useParams, Navigate } from "react-router-dom";
-
-import { getAuth } from "../utils/ajax";
+import { Form, useParams, Navigate, useOutletContext } from "react-router-dom";
 
 export async function action({ params, request }) {
   const formData = await request.formData();
@@ -16,9 +14,9 @@ export async function action({ params, request }) {
 }
 
 export default function EditRecipe() {
-  const [recipeDetails, setRecipeDetails] = useState({});
-  const [authorization, setAuthorization] = useState("authorizing");
   const recipeId = useParams().recipeId;
+  const [authorization, setAuthorization] = useOutletContext();
+  const [recipeDetails, setRecipeDetails] = useState({});
 
   useEffect(() => {
     const getRecipeDetails = async () => {
@@ -33,21 +31,11 @@ export default function EditRecipe() {
     getRecipeDetails();
   }, [recipeId]);
 
-  useEffect(() => {
-    getAuth().then((isAuthorized) => {
-      if (isAuthorized) {
-        setAuthorization("authorized");
-      } else {
-        setAuthorization("unauthorized");
-      }
-    });
-  }, []);
+  if (authorization === "authorized" && !recipeDetails.title) {
+    return <div>Loading recipe...</div>;
+  }
 
-  if (authorization === "authorized") {
-    if (!recipeDetails.title) {
-      return <div>Loading...</div>;
-    }
-
+  if (authorization === "authorized" && recipeDetails.title) {
     return (
       <>
         <h2>Edit Recipe</h2>

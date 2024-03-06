@@ -1,7 +1,11 @@
 import { useEffect, useState } from "react";
-import { Form, useLocation, useParams } from "react-router-dom";
-
-import { getAuth, getComments, getFavorites } from "../utils/ajax";
+import {
+  Form,
+  useLocation,
+  useParams,
+  useOutletContext,
+} from "react-router-dom";
+import { getComments, getFavorites } from "../utils/ajax";
 
 export async function action({ params, request }) {
   const formData = await request.formData();
@@ -17,19 +21,13 @@ export async function action({ params, request }) {
 
 export default function Detail() {
   const { state: recipe } = useLocation();
-
-  const [isAuthorized, setIsAuthorized] = useState(false);
+  const [authorization, setAuthorization] = useOutletContext();
   const [recipeComments, setRecipeComments] = useState([]);
   const [recipeFavorites, setRecipeFavorites] = useState([]);
   const [userHasFavorited, setUserHasFavorited] = useState(false);
   const [votes, setVotes] = useState(recipe.votes);
   const [userHasVoted, setUserHasVoted] = useState(false);
-
   const recipeId = useParams().recipeId;
-
-  useEffect(() => {
-    getAuth().then((isAuthorized) => setIsAuthorized(isAuthorized));
-  }, []);
 
   useEffect(() => {
     getComments(recipeId).then((comments) => setRecipeComments(comments));
@@ -74,7 +72,6 @@ export default function Detail() {
     const res = await fetch(`http://localhost:3000/vote/${recipeId}`, {
       credentials: "include",
     });
-
     const vote = await res.json();
     const voteCount = vote.voteCount;
 
@@ -88,7 +85,6 @@ export default function Detail() {
     const res = await fetch(`http://localhost:3000/unvote/${recipeId}`, {
       credentials: "include",
     });
-
     const vote = await res.json();
     const voteCount = vote.voteCount;
 
@@ -98,7 +94,7 @@ export default function Detail() {
     }
   };
 
-  if (isAuthorized && recipe) {
+  if (authorization === "authorized") {
     return (
       <>
         <div>
@@ -163,7 +159,9 @@ export default function Detail() {
           : null}
       </>
     );
-  } else if (recipe) {
+  }
+
+  if (authorization === "unauthorized") {
     return (
       <>
         <div>
@@ -189,5 +187,7 @@ export default function Detail() {
     );
   }
 
-  return <div>Loading...</div>;
+  if (authorization === "authorizing") {
+    return <div>Authorizing...</div>;
+  }
 }

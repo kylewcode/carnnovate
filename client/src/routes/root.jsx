@@ -1,25 +1,21 @@
 import { useEffect, useState } from "react";
 import { Outlet, Link } from "react-router-dom";
 
+import { getAuth } from "../utils/ajax";
+
 export default function Root() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [authorization, setAuthorization] = useState("authorizing");
 
-  /* Future code to check for persistent login session after application mounts. */
-  // useEffect(() => {
-  //   async function authUser() {
-  //     const response = await fetch("http://localhost:3000/auth");
-  //     console.log(response);
-  //     const auth = await response.json();
-  //     console.log(auth);
-
-  //     setIsLoggedIn(auth.isAuthorized);
-  //   }
-
-  //   authUser();
-  // }, []);
+  useEffect(() => {
+    getAuth().then((isAuthorized) =>
+      isAuthorized
+        ? setAuthorization("authorized")
+        : setAuthorization("unauthorized")
+    );
+  }, []);
 
   const handleClick = () => {
-    setIsLoggedIn(false);
+    setAuthorization("unauthorized");
     fetch("http://localhost:3000/logout", { credentials: "include" })
       .then((response) => response.json())
       .then((json) => console.log(json.message));
@@ -36,7 +32,7 @@ export default function Root() {
           <li>
             <Link to={`search`}>Search</Link>
           </li>
-          {isLoggedIn ? (
+          {authorization === "authorized" ? (
             <>
               <li>
                 <Link to={`create`}>Create New Recipe</Link>
@@ -51,7 +47,8 @@ export default function Root() {
               </li>
             </>
           ) : null}
-          {!isLoggedIn ? (
+          {authorization === "authorizing" ||
+          authorization === "unauthorized" ? (
             <>
               <li>
                 <Link to={`register`}>Sign Up</Link>
@@ -64,7 +61,7 @@ export default function Root() {
         </ul>
       </nav>
       <div>
-        <Outlet context={[isLoggedIn, setIsLoggedIn]} />
+        <Outlet context={[authorization, setAuthorization]} />
       </div>
     </>
   );
