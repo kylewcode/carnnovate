@@ -45,3 +45,19 @@ export const getFavorites = async (recipeId) => {
     console.error(error);
   }
 };
+
+export const getRecipe = async (recipeId) => {
+  try {
+    const res = await fetch(
+      `http://localhost:3000/get-recipe-details/${recipeId}`,
+      {
+        credentials: "include",
+      }
+    );
+    const recipe = await res.json();
+
+    return recipe;
+  } catch (error) {
+    console.error(error);
+  }
+};
