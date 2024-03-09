@@ -16,12 +16,11 @@ export default function Profile() {
   useEffect(() => {
     if (authorization === "authorized") {
       getUser().then((user) => {
-        // Server is currently not returning user favorites.
-        setUser((prevUser) => ({
-          ...prevUser,
+        setUser({
           username: user.username,
           recipes: user.recipes,
-        }));
+          favorites: user.favorites,
+        });
       });
     }
   }, [authorization]);
@@ -32,7 +31,7 @@ export default function Profile() {
         <div>
           <h2>{user.username}</h2>
           <p>Profile image goes here</p>
-          <p>Recipes go here</p>
+          <p>Recipes created</p>
           <ul>
             {user.recipes.length !== 0 ? (
               user.recipes.map((recipe, index) => {
@@ -45,10 +44,25 @@ export default function Profile() {
                 );
               })
             ) : (
-              <p>No recipes created yet! Create a recipe here *provide link</p>
+              <p>No recipes created yet!</p>
             )}
           </ul>
-          <p>Favorites go here</p>
+          <p>Recipes favorited</p>
+          <ul>
+            {user.favorites.length !== 0 ? (
+              user.favorites.map((favorite, index) => {
+                return (
+                  <li key={index}>
+                    <Link to={`/search/detail/${favorite.recipe_id}`}>
+                      {favorite.title}
+                    </Link>
+                  </li>
+                );
+              })
+            ) : (
+              <p>No recipes favorited.</p>
+            )}
+          </ul>
         </div>
       );
     } else {

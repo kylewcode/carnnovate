@@ -114,15 +114,34 @@ app.get("/logout", (req, res) => {
 app.get("/get-user", (req, res) => {
   const username = req.session.username;
   const userId = req.session.user_id;
-  const query = `
+  const recipeQuery = `
   SELECT recipe_id, title from recipes
-  WHERE user_id="${userId}";
+  WHERE user_id = ?;
   `;
+  const recipeVars = [userId];
 
-  pool.query(query, (error, results) => {
+  pool.query(recipeQuery, recipeVars, (error, results) => {
     if (error) throw error;
 
-    res.status(200).send({ username: username, recipes: results });
+    const recipeResults = results;
+    const favoritesQuery = `
+    SELECT f.recipe_id, r.title FROM favorites AS f
+    RIGHT JOIN recipes AS r ON f.recipe_id = r.recipe_id
+    WHERE f.user_id = ?;
+    `;
+    const favoritesVars = [userId];
+
+    pool.query(favoritesQuery, favoritesVars, (error, results) => {
+      if (error) throw error;
+
+      const favoritesResults = results;
+
+      res.status(200).send({
+        username: username,
+        recipes: recipeResults,
+        favorites: favoritesResults,
+      });
+    });
   });
 });
 
