@@ -45,7 +45,7 @@ export default function Search() {
     }
   };
 
-  if (searchResults.length !== 0) {
+  if (searchResults.length > 0) {
     let sortedSearchResults = [];
 
     if (sortState === "sort-title") {
@@ -58,8 +58,31 @@ export default function Search() {
       sortedSearchResults = sortDefault(searchResults);
     }
 
+    sessionStorage.setItem("search", JSON.stringify(sortedSearchResults));
+
     for (const result of sortedSearchResults) {
       recipesToDisplay.push(<Summary key={result.recipe_id} recipe={result} />);
+    }
+  }
+
+  if (searchResults.length === 0 && sessionStorage.getItem("search")) {
+    let sortedSearchResults = [];
+    let storedSearch = JSON.parse(sessionStorage.getItem("search"));
+
+    if (sortState === "sort-title") {
+      sortedSearchResults = sortByTitle(storedSearch);
+    } else if (sortState === "sort-time") {
+      sortedSearchResults = sortByTime(storedSearch);
+    } else if (sortState === "sort-votes") {
+      sortedSearchResults = sortByVotes(storedSearch);
+    } else if (sortState === "sort-none") {
+      sortedSearchResults = sortDefault(storedSearch);
+    }
+
+    sessionStorage.setItem("search", JSON.stringify(sortedSearchResults));
+
+    for (const recipe of sortedSearchResults) {
+      recipesToDisplay.push(<Summary key={recipe.recipe_id} recipe={recipe} />);
     }
   }
 
