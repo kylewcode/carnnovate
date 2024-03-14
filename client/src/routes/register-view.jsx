@@ -1,12 +1,12 @@
 import { Form, redirect } from "react-router-dom";
 
 export async function action({ request }) {
-  // const formData = await request.formData();
+  const formData = await request.formData();
 
-  // await fetch("http://localhost:3000/register", {
-  //   method: "POST",
-  //   body: formData,
-  // });
+  await fetch("http://localhost:3000/register", {
+    method: "POST",
+    body: formData,
+  });
   window.alert("You're all signed up! Go ahead and login on the next page.");
 
   return redirect("/login");
