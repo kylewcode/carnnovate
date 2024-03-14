@@ -1,4 +1,4 @@
-import { Form, Navigate, useOutletContext } from "react-router-dom";
+import { Form, Navigate, redirect, useOutletContext } from "react-router-dom";
 
 export async function action({ request }) {
   const formData = await request.formData();
@@ -8,8 +8,9 @@ export async function action({ request }) {
     body: formData,
     credentials: "include",
   });
+  window.alert("Recipe submitted!");
 
-  return null;
+  return redirect("/search");
 }
 
 export default function Create() {
