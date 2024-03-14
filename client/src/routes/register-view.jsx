@@ -1,14 +1,15 @@
-import { Form } from "react-router-dom";
+import { Form, redirect } from "react-router-dom";
 
 export async function action({ request }) {
-  const formData = await request.formData();
+  // const formData = await request.formData();
 
-  await fetch("http://localhost:3000/register", {
-    method: "POST",
-    body: formData,
-  });
+  // await fetch("http://localhost:3000/register", {
+  //   method: "POST",
+  //   body: formData,
+  // });
+  window.alert("You're all signed up! Go ahead and login on the next page.");
 
-  return null;
+  return redirect("/login");
 }
 
 export default function Register() {
@@ -20,7 +21,6 @@ export default function Register() {
         id="user-name"
         name="user-name"
         placeholder="Enter your name"
-        defaultValue="DeadNewbie"
       />
 
       <label htmlFor="email">Email</label>
@@ -29,7 +29,6 @@ export default function Register() {
         id="email"
         name="email"
         placeholder="Enter you email"
-        defaultValue="example@example.com"
       />
 
       <label htmlFor="password-1">Password</label>
@@ -38,7 +37,6 @@ export default function Register() {
         id="password-1"
         name="password-1"
         placeholder="Enter a password"
-        defaultValue="rammarammadingdong"
       />
 
       <label htmlFor="password-2">Password</label>
@@ -47,7 +45,6 @@ export default function Register() {
         id="password-2"
         name="password-2"
         placeholder="Reenter your password"
-        defaultValue="rammarammadingdong"
       />
 
       <button type="submit">Submit</button>
