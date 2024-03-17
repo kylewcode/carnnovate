@@ -175,7 +175,6 @@ app.get("/get-comments/:recipeId", (req, res) => {
   });
 });
 
-// Only need to get count of favorites
 app.get("/get-favorites/:recipeId", (req, res) => {
   const recipeId = req.params.recipeId;
   let userHasFavorited = false;
@@ -246,19 +245,44 @@ app.get("/unfavorite-recipe/:recipeId", (req, res) => {
 
 app.get("/get-votes/:recipeId", (req, res) => {
   const recipeId = req.params.recipeId;
+  const voteQuery = `
+  SELECT COUNT(*) AS count FROM votes
+  WHERE recipe_id=?
+  `;
+  const voteVariables = [recipeId];
 
-  const voteCountQuery = `
-    SELECT COUNT(*) FROM votes
-    WHERE recipe_id=?
-    `;
-  const voteCountVariables = [recipeId];
-
-  pool.query(voteCountQuery, voteCountVariables, (error, results) => {
+  pool.query(voteQuery, voteVariables, (error, results) => {
     if (error) throw error;
 
-    res.status(200).send({
-      voteCount: results[0]["COUNT(*)"],
-    });
+    const votes = results;
+
+    if (req.session.user_id) {
+      let userHasVoted = false;
+      const userId = req.session.user_id;
+      const checkUserQuery = `
+      SELECT vote_id FROM votes
+      WHERE user_id = ? AND recipe_id = ?
+      `;
+      const checkUserVariables = [userId, recipeId];
+
+      pool.query(checkUserQuery, checkUserVariables, (error, results) => {
+        if (error) throw error;
+
+        if (results.length !== 0) {
+          userHasVoted = true;
+        }
+
+        res.status(200).send({
+          voteCount: votes[0].count,
+          voted: userHasVoted,
+        });
+      });
+    } else {
+      res.status(200).send({
+        voteCount: votes[0].count,
+        voted: null,
+      });
+    }
   });
 });
 
@@ -300,17 +324,7 @@ app.get("/unvote/:recipeId", (req, res) => {
   pool.query(query, variables, (error, results) => {
     if (error) throw error;
 
-    const voteCountQuery = `
-    SELECT COUNT(*) FROM votes
-    WHERE recipe_id=?
-    `;
-    const voteCountVariables = [recipeId];
-
-    pool.query(voteCountQuery, voteCountVariables, (error, results) => {
-      if (error) throw error;
-
-      res.status(200).send("Vote removed");
-    });
+    res.status(200).send("Vote removed");
   });
 });
 

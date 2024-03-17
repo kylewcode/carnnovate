@@ -15,16 +15,6 @@ export async function action({ params, request }) {
 }
 
 export default function Detail() {
-  const [authorization, setAuthorization] = useOutletContext();
-
-  // const recipeId = useParams().recipeId;
-  // const [recipe.details, setRecipeDetails] = useState({});
-  // const [recipeComments, setRecipeComments] = useState([]);
-  // const [recipeFavorites, setRecipeFavorites] = useState([]);
-  // const [userHasFavorited, setUserHasFavorited] = useState(false);
-  // const [votes, setVotes] = useState(null);
-  // const [userHasVoted, setUserHasVoted] = useState(false);
-
   const initRecipe = {
     id: useParams().recipeId,
     details: {},
@@ -33,7 +23,7 @@ export default function Detail() {
     voted: false,
     favorited: false,
   };
-
+  const [authorization, setAuthorization] = useOutletContext();
   const [recipe, setRecipe] = useState(initRecipe);
 
   useEffect(() => {
@@ -59,12 +49,13 @@ export default function Detail() {
   }, [recipe.id]);
 
   useEffect(() => {
-    getVotes(recipe.id).then((voteCount) =>
+    getVotes(recipe.id).then((votes) => {
       setRecipe((prev) => ({
         ...prev,
-        details: { ...prev.details, votes: voteCount },
-      }))
-    );
+        details: { ...prev.details, votes: votes.voteCount },
+        voted: votes.voted,
+      }));
+    });
   }, [recipe.id]);
 
   // Refactor to return number
@@ -125,7 +116,7 @@ export default function Detail() {
       setRecipe((prev) => ({
         ...prev,
         details: { ...prev.details, votes: prev.details.votes-- },
-        voted: true,
+        voted: false,
       }));
     }
   };
