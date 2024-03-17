@@ -298,17 +298,7 @@ app.get("/vote/:recipeId", (req, res) => {
   pool.query(query, variables, (error, results) => {
     if (error) throw error;
 
-    const voteCountQuery = `
-    SELECT COUNT(*) FROM votes
-    WHERE recipe_id=?
-    `;
-    const voteCountVariables = [recipeId];
-
-    pool.query(voteCountQuery, voteCountVariables, (error, results) => {
-      if (error) throw error;
-
-      res.status(200).send("Recipe voted on");
-    });
+    res.status(200).send("Recipe voted on");
   });
 });
 
