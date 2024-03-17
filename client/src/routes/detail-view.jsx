@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Form, useParams, useOutletContext } from "react-router-dom";
-import { getComments, getFavorites, getRecipe } from "../utils/ajax";
+import { getComments, getFavorites, getRecipe, getVotes } from "../utils/ajax";
 
 export async function action({ params, request }) {
   const formData = await request.formData();
@@ -15,99 +15,134 @@ export async function action({ params, request }) {
 }
 
 export default function Detail() {
-  const recipeId = useParams().recipeId;
   const [authorization, setAuthorization] = useOutletContext();
-  const [recipeDetails, setRecipeDetails] = useState({});
-  const [recipeComments, setRecipeComments] = useState([]);
-  const [recipeFavorites, setRecipeFavorites] = useState([]);
-  const [userHasFavorited, setUserHasFavorited] = useState(false);
-  const [votes, setVotes] = useState(null);
-  const [userHasVoted, setUserHasVoted] = useState(false);
+
+  // const recipeId = useParams().recipeId;
+  // const [recipe.details, setRecipeDetails] = useState({});
+  // const [recipeComments, setRecipeComments] = useState([]);
+  // const [recipeFavorites, setRecipeFavorites] = useState([]);
+  // const [userHasFavorited, setUserHasFavorited] = useState(false);
+  // const [votes, setVotes] = useState(null);
+  // const [userHasVoted, setUserHasVoted] = useState(false);
+
+  const initRecipe = {
+    id: useParams().recipeId,
+    details: {},
+    comments: [],
+    favorites: 0,
+    voted: false,
+    favorited: false,
+  };
+
+  const [recipe, setRecipe] = useState(initRecipe);
 
   useEffect(() => {
-    getRecipe(recipeId).then((recipe) => {
-      setRecipeDetails(recipe);
+    getRecipe(recipe.id).then((recipe) => {
+      setRecipe((prev) => ({ ...prev, details: recipe }));
     });
-  }, [recipeId]);
+  }, [recipe.id]);
 
   useEffect(() => {
-    getComments(recipeId).then((comments) => setRecipeComments(comments));
-  }, [recipeId]);
+    getComments(recipe.id).then((comments) =>
+      setRecipe((prev) => ({ ...prev, comments: comments }))
+    );
+  }, [recipe.id]);
 
   useEffect(() => {
-    getFavorites(recipeId).then((data) => {
-      setRecipeFavorites(data.favorites);
-      setUserHasFavorited(data.favorited);
+    getFavorites(recipe.id).then((favorites) => {
+      setRecipe((prev) => ({
+        ...prev,
+        favorites: favorites.favoriteCount,
+        favorited: favorites.favorited,
+      }));
     });
-  }, [recipeId]);
+  }, [recipe.id]);
 
+  useEffect(() => {
+    getVotes(recipe.id).then((voteCount) =>
+      setRecipe((prev) => ({
+        ...prev,
+        details: { ...prev.details, votes: voteCount },
+      }))
+    );
+  }, [recipe.id]);
+
+  // Refactor to return number
   const favoriteRecipe = async () => {
     const res = await fetch(
-      `http://localhost:3000/favorite-recipe/${recipeId}`,
+      `http://localhost:3000/favorite-recipe/${recipe.id}`,
       {
         credentials: "include",
       }
     );
 
     if (res.ok) {
-      getFavorites(recipeId).then((data) => setRecipeFavorites(data.favorites));
-      setUserHasFavorited(true);
+      setRecipe((prev) => ({
+        ...prev,
+        favorites: prev.favorites++,
+        favorited: true,
+      }));
     }
   };
 
   const unfavoriteRecipe = async () => {
     const res = await fetch(
-      `http://localhost:3000/unfavorite-recipe/${recipeId}`,
+      `http://localhost:3000/unfavorite-recipe/${recipe.id}`,
       {
         credentials: "include",
       }
     );
 
     if (res.ok) {
-      getFavorites(recipeId).then((data) => setRecipeFavorites(data.favorites));
-      setUserHasFavorited(false);
+      setRecipe((prev) => ({
+        ...prev,
+        favorites: prev.favorites--,
+        favorited: false,
+      }));
     }
   };
 
   const voteForRecipe = async () => {
-    const res = await fetch(`http://localhost:3000/vote/${recipeId}`, {
+    const res = await fetch(`http://localhost:3000/vote/${recipe.id}`, {
       credentials: "include",
     });
-    const vote = await res.json();
-    const voteCount = vote.voteCount;
 
     if (res.ok) {
-      setVotes(voteCount);
-      setUserHasVoted(true);
+      setRecipe((prev) => ({
+        ...prev,
+        details: { ...prev.details, votes: prev.details.votes++ },
+        voted: true,
+      }));
     }
   };
 
   const unvoteRecipe = async () => {
-    const res = await fetch(`http://localhost:3000/unvote/${recipeId}`, {
+    const res = await fetch(`http://localhost:3000/unvote/${recipe.id}`, {
       credentials: "include",
     });
-    const vote = await res.json();
-    const voteCount = vote.voteCount;
 
     if (res.ok) {
-      setVotes(voteCount);
-      setUserHasVoted(false);
+      setRecipe((prev) => ({
+        ...prev,
+        details: { ...prev.details, votes: prev.details.votes-- },
+        voted: true,
+      }));
     }
   };
 
   if (authorization === "authorized") {
-    if (recipeDetails.title) {
+    if (recipe.details.title) {
       return (
         <>
           <div>
-            <h2>{recipeDetails.title}</h2>
-            <img src={recipeDetails.image} alt="" />
-            <p>Description: {recipeDetails.description}</p>
-            <p>Ingredients {recipeDetails.ingredients}</p>
-            <p>Instructions: {recipeDetails.instructions}</p>
-            <p>Time: {recipeDetails.time}</p>
+            <h2>{recipe.details.title}</h2>
+            <img src={recipe.details.image} alt="" />
+            <p>Description: {recipe.details.description}</p>
+            <p>Ingredients {recipe.details.ingredients}</p>
+            <p>Instructions: {recipe.details.instructions}</p>
+            <p>Time: {recipe.details.time}</p>
             <p>
-              {!userHasVoted ? (
+              {!recipe.voted ? (
                 <span>
                   <button type="button" onClick={() => voteForRecipe()}>
                     Vote for recipe
@@ -120,10 +155,10 @@ export default function Detail() {
                   </button>
                 </span>
               )}
-              Votes: {votes}
+              Votes: {recipe.details.votes}
             </p>
             <p>
-              {!userHasFavorited ? (
+              {!recipe.favorited ? (
                 <span>
                   <button type="button" onClick={() => favoriteRecipe()}>
                     Favorite this!
@@ -136,7 +171,7 @@ export default function Detail() {
                   </button>
                 </span>
               )}
-              Favorites: {recipeFavorites.length}
+              Favorites: {recipe.favorites}
             </p>
           </div>
           <h2>Comments</h2>
@@ -151,8 +186,8 @@ export default function Detail() {
             ></textarea>
             <button type="submit">Submit</button>
           </Form>
-          {recipeComments.length !== 0
-            ? recipeComments.map((comment, index) => (
+          {recipe.comments.length !== 0
+            ? recipe.comments.map((comment, index) => (
                 <div key={index}>
                   <h3>{comment.user_name}</h3>
                   <p>{comment.text}</p>
@@ -167,22 +202,22 @@ export default function Detail() {
   }
 
   if (authorization === "unauthorized") {
-    if (recipeDetails.title) {
+    if (recipe.details.title) {
       return (
         <>
           <div>
-            <h2>{recipeDetails.title}</h2>
-            <img src={recipeDetails.image} alt="" />
-            <p>Description: {recipeDetails.description}</p>
-            <p>Ingredients {recipeDetails.ingredients}</p>
-            <p>Instructions: {recipeDetails.instructions}</p>
-            <p>Time: {recipeDetails.time}</p>
-            <p>Votes: {votes}</p>
-            <p>Favorites: {recipeFavorites.length}</p>
+            <h2>{recipe.details.title}</h2>
+            <img src={recipe.details.image} alt="" />
+            <p>Description: {recipe.details.description}</p>
+            <p>Ingredients {recipe.details.ingredients}</p>
+            <p>Instructions: {recipe.details.instructions}</p>
+            <p>Time: {recipe.details.time}</p>
+            <p>Votes: {recipe.details.votes}</p>
+            <p>Favorites: {recipe.favorites}</p>
           </div>
           <h2>Comments</h2>
-          {recipeComments.length !== 0
-            ? recipeComments.map((comment, index) => (
+          {recipe.comments.length !== 0
+            ? recipe.comments.map((comment, index) => (
                 <div key={index}>
                   <h3>{comment.user_name}</h3>
                   <p>{comment.text}</p>

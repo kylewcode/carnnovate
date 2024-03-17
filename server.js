@@ -175,6 +175,7 @@ app.get("/get-comments/:recipeId", (req, res) => {
   });
 });
 
+// Only need to get count of favorites
 app.get("/get-favorites/:recipeId", (req, res) => {
   const recipeId = req.params.recipeId;
   let userHasFavorited = false;
@@ -197,7 +198,7 @@ app.get("/get-favorites/:recipeId", (req, res) => {
   }
 
   const favoriteQuery = `
-    SELECT favorite_id FROM favorites
+    SELECT COUNT(*) AS count FROM favorites
     WHERE recipe_id = ?;
   `;
   const favoriteVariables = [recipeId];
@@ -205,7 +206,9 @@ app.get("/get-favorites/:recipeId", (req, res) => {
   pool.query(favoriteQuery, favoriteVariables, (error, results) => {
     if (error) throw error;
 
-    res.status(200).send({ favorites: results, favorited: userHasFavorited });
+    res
+      .status(200)
+      .send({ favoriteCount: results[0].count, favorited: userHasFavorited });
   });
 });
 
@@ -241,6 +244,24 @@ app.get("/unfavorite-recipe/:recipeId", (req, res) => {
   });
 });
 
+app.get("/get-votes/:recipeId", (req, res) => {
+  const recipeId = req.params.recipeId;
+
+  const voteCountQuery = `
+    SELECT COUNT(*) FROM votes
+    WHERE recipe_id=?
+    `;
+  const voteCountVariables = [recipeId];
+
+  pool.query(voteCountQuery, voteCountVariables, (error, results) => {
+    if (error) throw error;
+
+    res.status(200).send({
+      voteCount: results[0]["COUNT(*)"],
+    });
+  });
+});
+
 app.get("/vote/:recipeId", (req, res) => {
   const recipeId = req.params.recipeId;
   const userId = req.session.user_id;
@@ -262,10 +283,7 @@ app.get("/vote/:recipeId", (req, res) => {
     pool.query(voteCountQuery, voteCountVariables, (error, results) => {
       if (error) throw error;
 
-      res.status(200).send({
-        message: "Recipe voted on.",
-        voteCount: results[0]["COUNT(*)"],
-      });
+      res.status(200).send("Recipe voted on");
     });
   });
 });
@@ -291,10 +309,7 @@ app.get("/unvote/:recipeId", (req, res) => {
     pool.query(voteCountQuery, voteCountVariables, (error, results) => {
       if (error) throw error;
 
-      res.status(200).send({
-        message: "Vote removed.",
-        voteCount: results[0]["COUNT(*)"],
-      });
+      res.status(200).send("Vote removed");
     });
   });
 });

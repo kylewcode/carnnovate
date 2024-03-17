@@ -39,6 +39,8 @@ export const getFavorites = async (recipeId) => {
       credentials: "include",
     });
     const favorites = await res.json();
+    // (will be an object {favoriteCount: number, favorited: boolean} 99%)(True)
+    console.log(favorites);
 
     return favorites;
   } catch (error) {
@@ -57,6 +59,19 @@ export const getRecipe = async (recipeId) => {
     const recipe = await res.json();
 
     return recipe;
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+export const getVotes = async (recipeId) => {
+  try {
+    const res = await fetch(`http://localhost:3000/get-votes/${recipeId}`, {
+      credentials: "include",
+    });
+    const votes = await res.json();
+
+    return votes.voteCount;
   } catch (error) {
     console.error(error);
   }
