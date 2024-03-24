@@ -58,7 +58,6 @@ export default function Detail() {
     });
   }, [recipe.id]);
 
-  // Refactor to return number
   const favoriteRecipe = async () => {
     const res = await fetch(
       `http://localhost:3000/favorite-recipe/${recipe.id}`,

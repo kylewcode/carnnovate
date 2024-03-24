@@ -177,37 +177,42 @@ app.get("/get-comments/:recipeId", (req, res) => {
 
 app.get("/get-favorites/:recipeId", (req, res) => {
   const recipeId = req.params.recipeId;
-  let userHasFavorited = false;
-
-  if (req.session.user_id) {
-    const userId = req.session.user_id;
-    const checkUserQuery = `
-    SELECT favorite_id FROM favorites
-    WHERE user_id = ? AND recipe_id = ?
-    `;
-    const checkUserVariables = [userId, recipeId];
-
-    pool.query(checkUserQuery, checkUserVariables, (error, results) => {
-      if (error) throw error;
-
-      if (results.length !== 0) {
-        userHasFavorited = true;
-      }
-    });
-  }
-
   const favoriteQuery = `
-    SELECT COUNT(*) AS count FROM favorites
-    WHERE recipe_id = ?;
+  SELECT COUNT(*) AS count FROM favorites
+  WHERE recipe_id = ?;
   `;
   const favoriteVariables = [recipeId];
 
   pool.query(favoriteQuery, favoriteVariables, (error, results) => {
     if (error) throw error;
 
-    res
-      .status(200)
-      .send({ favoriteCount: results[0].count, favorited: userHasFavorited });
+    const favorites = results;
+
+    if (req.session.user_id) {
+      const userId = req.session.user_id;
+      const checkUserQuery = `
+      SELECT favorite_id FROM favorites
+      WHERE user_id = ? AND recipe_id = ?
+      `;
+      const checkUserVariables = [userId, recipeId];
+      let userHasFavorited = false;
+
+      pool.query(checkUserQuery, checkUserVariables, (error, results) => {
+        if (error) throw error;
+
+        if (results.length !== 0) {
+          userHasFavorited = true;
+        }
+        res.status(200).send({
+          favoriteCount: favorites[0].count,
+          favorited: userHasFavorited,
+        });
+      });
+    } else {
+      res
+        .status(200)
+        .send({ favoriteCount: favorites[0].count, favorited: null });
+    }
   });
 });
 
@@ -257,13 +262,13 @@ app.get("/get-votes/:recipeId", (req, res) => {
     const votes = results;
 
     if (req.session.user_id) {
-      let userHasVoted = false;
       const userId = req.session.user_id;
       const checkUserQuery = `
       SELECT vote_id FROM votes
       WHERE user_id = ? AND recipe_id = ?
       `;
       const checkUserVariables = [userId, recipeId];
+      let userHasVoted = false;
 
       pool.query(checkUserQuery, checkUserVariables, (error, results) => {
         if (error) throw error;
