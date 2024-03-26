@@ -418,37 +418,45 @@ app.post("/request-reset", upload.none(), (req, res) => {
     WHERE email = "${email}"
   `;
 
-  pool.query(query, function (error, results) {
+  pool.query(query, (error, results) => {
     if (error) throw error;
 
     if (results.length !== 0) {
       const stringToHash = String(results.user_id) + Date();
       const { user_id: userId } = results[0];
 
-      bcrypt.hash(stringToHash, saltRounds, async function (err, hash) {
+      bcrypt.hash(stringToHash, saltRounds, (err, hash) => {
         if (err) throw err;
 
-        const encodedHash = encodeURIComponent(hash).replaceAll(".", "");
-
+        // Delete previous token for user if it exists
         pool.query(
-          "INSERT INTO tokens (token, user_id) VALUES (?,?)",
-          [encodedHash, userId],
-          function (error, results) {
+          "DELETE from tokens WHERE user_id = ?",
+          [userId],
+          (error, results) => {
             if (error) throw error;
 
-            console.log("Encoded token stored successfully!");
+            console.log("Deleted token for user.");
+            const encodedHash = encodeURIComponent(hash).replaceAll(".", "");
+
+            pool.query(
+              "INSERT INTO tokens (token, user_id) VALUES (?,?)",
+              [encodedHash, userId],
+              async (error, results) => {
+                if (error) throw error;
+
+                console.log("Encoded token stored successfully!");
+                const link = `http://localhost:5173/password-reset/${encodedHash}`;
+
+                // If local dev, populate text file with link.
+                const filename = "password-reset-email-body.txt";
+                await clearFile(filename);
+                await appendToFile(filename, link);
+                // If production, send email.
+                res.status(200).send({ message: "Email sent!" });
+              }
+            );
           }
         );
-
-        const link = `http://localhost:5173/password-reset/${encodedHash}`;
-
-        // If local dev, populate text file with link.
-        const filename = "password-reset-email-body.txt";
-        await clearFile(filename);
-        await appendToFile(filename, link);
-
-        // If production, send email.
-        res.status(200).send({ message: "Email sent!" });
       });
     } else {
       res.status(200).send({ message: "Email does not exist in database." });
