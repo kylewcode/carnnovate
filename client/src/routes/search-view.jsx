@@ -8,9 +8,13 @@ import { sortDefault } from "../utils/sorts";
 import Summary from "..//components/Summary";
 
 export default function Search() {
-  const [searchText, setSearchText] = useState("");
+  // 1. Load previous session storage, or defaults if there is none.
+  const initSearchtext = sessionStorage.getItem("searchText") || "";
+  const initSortState = sessionStorage.getItem("sortState") || "sort-none";
+  const [searchText, setSearchText] = useState(initSearchtext);
+  // Could also init searchResults on component load instead of current implementation.
   const [searchResults, setSearchResults] = useState([]);
-  const [sortState, setSortState] = useState("sort-none");
+  const [sortState, setSortState] = useState(initSortState);
   const recipesToDisplay = [];
 
   const handleSearch = async () => {
@@ -85,7 +89,7 @@ export default function Search() {
       recipesToDisplay.push(<Summary key={recipe.recipe_id} recipe={recipe} />);
     }
   }
-
+  // 2. Display values in UI
   return (
     <div>
       <input
