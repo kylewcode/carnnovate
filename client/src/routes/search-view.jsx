@@ -8,7 +8,6 @@ import { sortDefault } from "../utils/sorts";
 import Summary from "..//components/Summary";
 
 export default function Search() {
-  // 1. Load previous session storage, or defaults if there is none.
   const initSearchtext = sessionStorage.getItem("searchText") || "";
   const initSortState = sessionStorage.getItem("sortState") || "sort-none";
   const [searchText, setSearchText] = useState(initSearchtext);
@@ -37,6 +36,7 @@ export default function Search() {
 
   const handleDropdown = (e) => {
     const option = e.target.value;
+    sessionStorage.setItem("sortState", option);
 
     if (option === "sort-title") {
       setSortState("sort-title");
@@ -89,13 +89,15 @@ export default function Search() {
       recipesToDisplay.push(<Summary key={recipe.recipe_id} recipe={recipe} />);
     }
   }
-  // 2. Display values in UI
   return (
     <div>
       <input
         type="text"
         value={searchText}
-        onChange={(e) => setSearchText(e.target.value)}
+        onChange={(e) => {
+          setSearchText(e.target.value);
+          sessionStorage.setItem("searchText", e.target.value);
+        }}
         onKeyUp={handleKeyUp}
         placeholder="Enter your search text"
       />
@@ -105,7 +107,7 @@ export default function Search() {
         id="sort-id"
         name="sort-dropdown"
         onChange={handleDropdown}
-        defaultValue="sort-none"
+        defaultValue={sortState}
       >
         <option value="sort-none">None</option>
         <option value="sort-title">Title</option>
