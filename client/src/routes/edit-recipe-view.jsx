@@ -10,6 +10,8 @@ export async function action({ params, request }) {
     credentials: "include",
   });
 
+  window.alert("Recipe updated");
+
   return null;
 }
 
