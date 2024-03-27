@@ -8,6 +8,10 @@ export async function action({ request }) {
     body: formData,
   });
 
+  window.alert(
+    "A link to reset your password has been sent to your account email."
+  );
+
   return null;
 }
 
