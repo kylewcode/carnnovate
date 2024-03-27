@@ -10,10 +10,10 @@ import Summary from "..//components/Summary";
 export default function Search() {
   const initSearchtext = sessionStorage.getItem("searchText") || "";
   const initSortState = sessionStorage.getItem("sortState") || "sort-none";
+  const initSearchState = JSON.parse(sessionStorage.getItem("search")) || [];
   const [searchText, setSearchText] = useState(initSearchtext);
-  // Could also init searchResults on component load instead of current implementation.
-  const [searchResults, setSearchResults] = useState([]);
   const [sortState, setSortState] = useState(initSortState);
+  const [searchResults, setSearchResults] = useState(initSearchState);
   const recipesToDisplay = [];
 
   const handleSearch = async () => {
@@ -69,26 +69,6 @@ export default function Search() {
     }
   }
 
-  if (searchResults.length === 0 && sessionStorage.getItem("search")) {
-    let sortedSearchResults = [];
-    let storedSearch = JSON.parse(sessionStorage.getItem("search"));
-
-    if (sortState === "sort-title") {
-      sortedSearchResults = sortByTitle(storedSearch);
-    } else if (sortState === "sort-time") {
-      sortedSearchResults = sortByTime(storedSearch);
-    } else if (sortState === "sort-votes") {
-      sortedSearchResults = sortByVotes(storedSearch);
-    } else if (sortState === "sort-none") {
-      sortedSearchResults = sortDefault(storedSearch);
-    }
-
-    sessionStorage.setItem("search", JSON.stringify(sortedSearchResults));
-
-    for (const recipe of sortedSearchResults) {
-      recipesToDisplay.push(<Summary key={recipe.recipe_id} recipe={recipe} />);
-    }
-  }
   return (
     <div>
       <input
