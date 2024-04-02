@@ -65,6 +65,11 @@ app.get("/", (req, res) => {
   res.send(`Hello ${req.session.username}`);
 });
 
+app.get("/get-username", (req, res) => {
+  const username = req.session.username;
+  res.status(200).send({ user_name: username });
+});
+
 app.get("/recipes", (req, res) => {
   const searchText = req.query.search;
 
@@ -576,6 +581,8 @@ app.post("/add-comment/:recipeId", upload.none(), (req, res) => {
 
   pool.query(query, commentDetails, (error, results) => {
     if (error) throw error;
+    // Return the comment that was added. Could modify insert query to include subquery.
+    console.log(results);
 
     res.status(200).send("Comment added.");
   });

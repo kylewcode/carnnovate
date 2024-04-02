@@ -5,7 +5,10 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 
 import Root from "./routes/root";
 import Search from "./routes/search-view";
-import Detail, { action as detailAction } from "./routes/detail-view";
+import Detail, {
+  action as detailAction,
+  loader as detailLoader,
+} from "./routes/detail-view";
 import Create, { action as createAction } from "./routes/create-view";
 import Register, { action as registerAction } from "./routes/register-view";
 import Login, { action as loginAction } from "./routes/login-view";
@@ -36,6 +39,7 @@ const router = createBrowserRouter([
       {
         path: "search/detail/:recipeId",
         element: <Detail />,
+        loader: detailLoader,
         action: detailAction,
       },
       {

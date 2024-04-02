@@ -1,9 +1,16 @@
 import { useEffect, useState } from "react";
-import { Form, useParams, useOutletContext } from "react-router-dom";
+import {
+  Form,
+  useParams,
+  useOutletContext,
+  useLoaderData,
+  useActionData,
+} from "react-router-dom";
 import { getComments, getFavorites, getRecipe, getVotes } from "../utils/ajax";
 
 export async function action({ params, request }) {
   const formData = await request.formData();
+  const commentText = formData.get("comment");
 
   await fetch(`http://localhost:3000/add-comment/${params.recipeId}`, {
     method: "POST",
@@ -11,52 +18,52 @@ export async function action({ params, request }) {
     body: formData,
   });
 
-  return null;
+  const res = await fetch("http://localhost:3000/get-username", {
+    credentials: "include",
+  });
+  const data = await res.json();
+
+  window.alert("Comment submitted.");
+
+  return { text: commentText, user_name: data.user_name };
+}
+
+export async function loader({ params }) {
+  const details = await getRecipe(params.recipeId);
+  const comments = await getComments(params.recipeId);
+  const favorites = await getFavorites(params.recipeId);
+  const votes = await getVotes(params.recipeId);
+
+  return {
+    comments: comments,
+    details: details,
+    favorites: favorites,
+    votes: votes,
+  };
 }
 
 export default function Detail() {
+  const { comments, details, favorites, votes } = useLoaderData();
+  const newComment = useActionData();
+  const [authorization, setAuthorization] = useOutletContext();
   const initRecipe = {
     id: useParams().recipeId,
-    details: {},
-    comments: [],
-    favorites: 0,
-    voted: false,
-    favorited: false,
+    details: details,
+    comments: comments,
+    favorites: favorites.favoriteCount,
+    voted: votes.voted,
+    favorited: favorites.favorited,
   };
-  const [authorization, setAuthorization] = useOutletContext();
   const [recipe, setRecipe] = useState(initRecipe);
 
   useEffect(() => {
-    getRecipe(recipe.id).then((recipe) => {
-      setRecipe((prev) => ({ ...prev, details: recipe }));
-    });
-  }, [recipe.id]);
-
-  useEffect(() => {
-    getComments(recipe.id).then((comments) =>
-      setRecipe((prev) => ({ ...prev, comments: comments }))
-    );
-  }, [recipe.id]);
-
-  useEffect(() => {
-    getFavorites(recipe.id).then((favorites) => {
-      setRecipe((prev) => ({
-        ...prev,
-        favorites: favorites.favoriteCount,
-        favorited: favorites.favorited,
+    if (newComment) {
+      setRecipe((prevRecipe) => ({
+        ...prevRecipe,
+        comments: [...prevRecipe.comments, newComment],
       }));
-    });
-  }, [recipe.id]);
-
-  useEffect(() => {
-    getVotes(recipe.id).then((votes) => {
-      setRecipe((prev) => ({
-        ...prev,
-        details: { ...prev.details, votes: votes.voteCount },
-        voted: votes.voted,
-      }));
-    });
-  }, [recipe.id]);
+    }
+  }, [newComment]);
 
   const favoriteRecipe = async () => {
     const res = await fetch(
