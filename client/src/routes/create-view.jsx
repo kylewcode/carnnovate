@@ -20,12 +20,7 @@ export default function Create() {
     return (
       <Form method="post" encType="multipart/form-data">
         <label htmlFor="title">Title</label>
-        <input
-          type="text"
-          name="title"
-          id="title"
-          defaultValue="Bacon-wrapped Shrimp"
-        />
+        <input type="text" name="title" id="title" />
 
         <label htmlFor="image">Upload image</label>
         <input type="file" name="image" id="image" />
@@ -37,7 +32,6 @@ export default function Create() {
           cols="30"
           rows="10"
           placeholder="Enter a description..."
-          defaultValue="This is a description."
         ></textarea>
 
         <label htmlFor="ingredients">Ingredients</label>
@@ -47,7 +41,6 @@ export default function Create() {
           cols="30"
           rows="10"
           placeholder="Enter ingredients with a new line for each ingredient."
-          defaultValue="These are ingredients."
         ></textarea>
 
         <label htmlFor="instructions">Instructions</label>
@@ -57,11 +50,10 @@ export default function Create() {
           cols="30"
           rows="10"
           placeholder="Enter instructions..."
-          defaultValue="These are instructions."
         ></textarea>
 
         <label htmlFor="time">Time (in minutes)</label>
-        <input type="number" name="time" id="time" defaultValue="30" />
+        <input type="number" name="time" id="time" />
 
         <button type="submit">Submit</button>
       </Form>
