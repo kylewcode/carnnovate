@@ -1,0 +1,113 @@
+/* Desktop Styles */
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+    background-color: white;
+}
+
+footer {
+    width: 100%;
+    padding: 1rem 0rem;
+    background-color: #191825;
+    text-align: center;
+}
+
+.logo {
+    width: 150px;
+    height: auto;
+    margin-right: 1rem;
+}
+
+
+.navigation {
+    display: flex;
+    margin: 0;
+    padding: 0;
+}
+
+.navigation a {
+    padding: 0.5rem 1rem;
+    text-decoration: none;
+    color: #191825;
+}
+
+.navigation a:hover {
+    color:#f49cbb;
+}
+
+.navigation li {
+    display: inline-block;
+    font-weight: bold;
+}
+
+.signup-button, .login-button {
+    background: #dd2d4a;
+    background-image: -webkit-linear-gradient(top, #dd2d4a, #9c001a);
+    background-image: -moz-linear-gradient(top, #dd2d4a, #9c001a);
+    background-image: -ms-linear-gradient(top, #dd2d4a, #9c001a);
+    background-image: -o-linear-gradient(top, #dd2d4a, #9c001a);
+    background-image: linear-gradient(to bottom, #dd2d4a, #9c001a);
+    -moz-border-radius: 2;
+    border-radius: 2px;
+    padding: 10px 10px 10px 10px;
+    margin: 0px 10px;
+}
+
+.signup-button:hover, .login-button:hover {
+    background: #f49cbb;
+}
+
+/* Mobile layouts */
+
+@media screen and (max-width: 700px) {
+    .logo {
+        width: 100px;
+        height: auto;
+        margin-right: 3rem;
+    }
+}
+
+@media screen and (max-width: 530px) {
+    header {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 1rem 0rem;
+        background-color: white;
+    }
+    
+    header ul {
+        text-align: center;
+    }
+
+    .logo {
+        width: 100px;
+        height: auto;
+        margin-right: 2rem;
+    }
+
+    .navigation li {
+        display: block;
+        margin-bottom: 5px;
+    }
+
+    .signup-button, .login-button {
+        background: #dd2d4a;
+        background-image: -webkit-linear-gradient(top, #dd2d4a, #9c001a);
+        background-image: -moz-linear-gradient(top, #dd2d4a, #9c001a);
+        background-image: -ms-linear-gradient(top, #dd2d4a, #9c001a);
+        background-image: -o-linear-gradient(top, #dd2d4a, #9c001a);
+        background-image: linear-gradient(to bottom, #dd2d4a, #9c001a);
+        -moz-border-radius: 2;
+        border-radius: 2px;
+        padding: 5px 0px 5px 0px;
+    }
+}
+
+/* Utility classes */
+
+.white-text {
+    color: white !important;
+}

@@ -7,6 +7,8 @@ import { sortDefault } from "../utils/sorts";
 
 import Summary from "..//components/Summary";
 
+import "../styles/search-view.css";
+
 export default function Search() {
   const initSearchtext = sessionStorage.getItem("searchText") || "";
   const initSortState = sessionStorage.getItem("sortState") || "sort-none";
@@ -70,31 +72,40 @@ export default function Search() {
   }
 
   return (
-    <div>
-      <input
-        type="text"
-        value={searchText}
-        onChange={(e) => {
-          setSearchText(e.target.value);
-          sessionStorage.setItem("searchText", e.target.value);
-        }}
-        onKeyUp={handleKeyUp}
-        placeholder="Enter your search text"
-      />
-      <button onClick={handleSearch}>Search</button>
-      <label htmlFor="sort-id">Sort by:</label>
-      <select
-        id="sort-id"
-        name="sort-dropdown"
-        onChange={handleDropdown}
-        defaultValue={sortState}
-      >
-        <option value="sort-none">None</option>
-        <option value="sort-title">Title</option>
-        <option value="sort-time">Total Time</option>
-        <option value="sort-votes">Votes</option>
-      </select>
-      <ul>{recipesToDisplay}</ul>
-    </div>
+    <>
+      <h1 className="page-title">Search a recipe</h1>
+      <div className="searchpage-layout">
+        <div className="search-interface">
+          <input
+            type="text"
+            value={searchText}
+            onChange={(e) => {
+              setSearchText(e.target.value);
+              sessionStorage.setItem("searchText", e.target.value);
+            }}
+            onKeyUp={handleKeyUp}
+            placeholder="Enter your search text"
+          />
+          <div className="sort-interface">
+            <label htmlFor="sort-id">Sort by:</label>
+            <select
+              id="sort-id"
+              name="sort-dropdown"
+              onChange={handleDropdown}
+              defaultValue={sortState}
+            >
+              <option value="sort-none">None</option>
+              <option value="sort-title">Title</option>
+              <option value="sort-time">Total Time</option>
+              <option value="sort-votes">Votes</option>
+            </select>
+          </div>
+          <button onClick={handleSearch} className="search-button">
+            Search
+          </button>
+        </div>
+        <ul>{recipesToDisplay}</ul>
+      </div>
+    </>
   );
 }

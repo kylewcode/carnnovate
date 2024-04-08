@@ -1,10 +1,14 @@
 import { useEffect, useState } from "react";
-import { Outlet, Link } from "react-router-dom";
+import { Outlet, Link, useLocation } from "react-router-dom";
 
 import { getAuth } from "../utils/ajax";
 
+import "../App.css";
+import "../styles/home-page.css";
+
 export default function Root() {
   const [authorization, setAuthorization] = useState("authorizing");
+  const location = useLocation();
 
   useEffect(() => {
     getAuth().then((isAuthorized) =>
@@ -24,9 +28,12 @@ export default function Root() {
   return (
     <>
       <header>
-        <img src="../src/img/logo-150w.jpg" alt="Carnnovate logo" />
-        <nav>
-          <h1>Carnnovate</h1>
+        <img
+          src="../src/img/logo-150w.jpg"
+          alt="Carnnovate logo"
+          className="logo"
+        />
+        <nav className="navigation">
           <ul>
             <li>
               <Link to={`/`}>Home</Link>
@@ -52,11 +59,15 @@ export default function Root() {
             {authorization === "authorizing" ||
             authorization === "unauthorized" ? (
               <>
-                <li>
-                  <Link to={`register`}>Sign Up</Link>
+                <li className="signup-button">
+                  <Link to={`register`} className="white-text">
+                    Sign Up
+                  </Link>
                 </li>
-                <li>
-                  <Link to={`login`}>Login</Link>
+                <li className="login-button">
+                  <Link to={`login`} className="white-text">
+                    Login
+                  </Link>
                 </li>
               </>
             ) : null}
@@ -64,10 +75,21 @@ export default function Root() {
         </nav>
       </header>
 
-      <main>
+      <main className={location.pathname === "/" ? "homepage-layout" : null}>
+        {location.pathname === "/" && (
+          <div className="site-title">
+            <h1>Carnnovate</h1>
+            <h2>A user-driven recipe database for the Carnivore Diet</h2>
+          </div>
+        )}
         <Outlet context={[authorization, setAuthorization]} />
       </main>
-      <footer>This is the footer.</footer>
+
+      <footer>
+        <div>
+          <p>&copy; 2024 Carnnovate Inc.</p>
+        </div>
+      </footer>
     </>
   );
 }

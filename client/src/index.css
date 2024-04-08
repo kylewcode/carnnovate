@@ -1,0 +1,34 @@
+/* Site color scheme
+OU crimson 880D1E
+Rusty red DD2D4A
+Bright pink F26A8D
+Amaranth pink F49CBB
+Raisin black 191825
+*/
+
+/* Global Styles */
+html {
+    box-sizing: border-box;
+    font-family: "Noto Sans", sans-serif;
+    min-height: 100%;
+    color: white;
+}
+  
+body {
+    background: #880d1e;
+    margin: 0px;
+}
+
+h1 {
+    font-size: 3rem;
+}
+
+h2 {
+    font-size: 1.5rem;
+}
+
+ul {
+    list-style-type: none;
+    margin: 0px;
+    padding: 0px;
+}
