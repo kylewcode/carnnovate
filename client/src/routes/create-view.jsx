@@ -1,5 +1,7 @@
 import { Form, Navigate, redirect, useOutletContext } from "react-router-dom";
 
+import "../styles/create-view.css";
+
 export async function action({ request }) {
   const formData = await request.formData();
 
@@ -18,7 +20,11 @@ export default function Create() {
 
   if (authorization === "authorized") {
     return (
-      <Form method="post" encType="multipart/form-data">
+      <Form
+        method="post"
+        encType="multipart/form-data"
+        className="createpage-layout"
+      >
         <label htmlFor="title">Title</label>
         <input type="text" name="title" id="title" />
 
@@ -55,7 +61,9 @@ export default function Create() {
         <label htmlFor="time">Time (in minutes)</label>
         <input type="number" name="time" id="time" />
 
-        <button type="submit">Submit</button>
+        <button type="submit" className="content-button">
+          Submit
+        </button>
       </Form>
     );
   }
