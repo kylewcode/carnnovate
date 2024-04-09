@@ -1,0 +1,30 @@
+/* Mobile Styles */
+.recipe-details-layout {
+    background-image: linear-gradient(rgba(0, 0, 0, 0.527),rgba(0, 0, 0, 0.5)) , url("https://source.unsplash.com/q6Y8Xr3SoQA");
+    background-position: center;
+    background-repeat: no-repeat;
+    background-origin: border-box;
+    background-size: cover;
+    width: 75vw;
+    box-shadow: -6px 6px 3px 0px rgba(0,0,0,0.75);
+    margin-bottom: 1rem;
+    padding: 0rem 1rem;
+}
+
+.recipe-details-layout h1 {
+    font-size: 1.5rem;
+}
+
+.recipe-details-layout h2 {
+    font-size: 1.25rem;
+}
+
+.recipe-details-layout p {
+    text-align: left;
+}
+
+.separator {
+    width: 20%;
+    margin: 2rem auto;
+    border-bottom: 5px dotted white;
+}

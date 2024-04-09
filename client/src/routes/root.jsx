@@ -41,13 +41,13 @@ export default function Root() {
             </li>
             {authorization === "authorized" ? (
               <>
-                <li>
-                  <Link to={`create`}>Create New Recipe</Link>
+                <li className="navigation-button">
+                  <Link to={`create`}>Create</Link>
                 </li>
-                <li>
+                <li className="navigation-button">
                   <Link to={`profile`}>Profile</Link>
                 </li>
-                <li>
+                <li className="navigation-button">
                   <button type="button" onClick={() => handleClick()}>
                     Logout
                   </button>
@@ -57,12 +57,12 @@ export default function Root() {
             {authorization === "authorizing" ||
             authorization === "unauthorized" ? (
               <>
-                <li className="signup-button">
+                <li className="navigation-button">
                   <Link to={`register`} className="white-text">
                     Sign Up
                   </Link>
                 </li>
-                <li className="login-button">
+                <li className="navigation-button">
                   <Link to={`login`} className="white-text">
                     Login
                   </Link>

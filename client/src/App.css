@@ -46,7 +46,7 @@ footer {
     font-weight: bold;
 }
 
-.signup-button, .login-button {
+.navigation-button {
     background: #dd2d4a;
     background-image: -webkit-linear-gradient(top, #dd2d4a, #9c001a);
     background-image: -moz-linear-gradient(top, #dd2d4a, #9c001a);
@@ -58,8 +58,24 @@ footer {
     padding: 5px 0px 5px 0px;
 }
 
-.signup-button:hover, .login-button:hover {
+.navigation-button:hover {
     background: #f49cbb;
+}
+
+.navigation-button a, .navigation-button button {
+    color: white;
+}
+
+/* Needed since navigation uses li wrappers that are style as buttons. */
+.navigation-button button {
+    background-color: transparent;
+    border-width: 0;
+    font-family: inherit;
+    font-size: inherit;
+    font-style: inherit;
+    font-weight: inherit;
+    line-height: inherit;
+    padding: 0;
 }
 
 @media screen and (max-width: 700px) {
@@ -93,7 +109,7 @@ footer {
         display: inline-block;
     }
 
-    .signup-button, .login-button {
+    .navigation-button {
         padding: 10px 10px 10px 10px;
         margin: 0px 10px;
     }

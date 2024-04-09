@@ -7,6 +7,10 @@ import {
   useActionData,
 } from "react-router-dom";
 import { getComments, getFavorites, getRecipe, getVotes } from "../utils/ajax";
+
+import RecipeDetails from "../components/RecipeDetails";
+import RecipeComments from "../components/RecipeComments";
+
 import "../styles/detail-view.css";
 
 export async function action({ params, request }) {
@@ -132,45 +136,34 @@ export default function Detail() {
     if (recipe.details.title) {
       return (
         <>
+          <RecipeDetails recipe={recipe} />
           <div>
-            <h2>{recipe.details.title}</h2>
-            <img src={recipe.details.image} alt="" />
-            <p>Description: {recipe.details.description}</p>
-            <p>Ingredients {recipe.details.ingredients}</p>
-            <p>Instructions: {recipe.details.instructions}</p>
-            <p>Time: {recipe.details.time}</p>
-            <p>
-              {!recipe.voted ? (
-                <span>
-                  <button type="button" onClick={() => voteForRecipe()}>
-                    Vote for recipe
-                  </button>
-                </span>
-              ) : (
-                <span>
-                  <button type="button" onClick={() => unvoteRecipe()}>
-                    Unvote recipe
-                  </button>
-                </span>
-              )}
-              Votes: {recipe.details.votes}
-            </p>
-            <p>
-              {!recipe.favorited ? (
-                <span>
-                  <button type="button" onClick={() => favoriteRecipe()}>
-                    Favorite this!
-                  </button>
-                </span>
-              ) : (
-                <span>
-                  <button type="button" onClick={() => unfavoriteRecipe()}>
-                    Unfavorite this!
-                  </button>
-                </span>
-              )}
-              Favorites: {recipe.favorites}
-            </p>
+            {!recipe.voted ? (
+              <span>
+                <button type="button" onClick={() => voteForRecipe()}>
+                  Vote for recipe
+                </button>
+              </span>
+            ) : (
+              <span>
+                <button type="button" onClick={() => unvoteRecipe()}>
+                  Unvote recipe
+                </button>
+              </span>
+            )}
+            {!recipe.favorited ? (
+              <span>
+                <button type="button" onClick={() => favoriteRecipe()}>
+                  Favorite this!
+                </button>
+              </span>
+            ) : (
+              <span>
+                <button type="button" onClick={() => unfavoriteRecipe()}>
+                  Unfavorite this!
+                </button>
+              </span>
+            )}
           </div>
           <h2>Comments</h2>
           <Form method="post" encType="multipart/form-data">
@@ -184,14 +177,7 @@ export default function Detail() {
             ></textarea>
             <button type="submit">Submit</button>
           </Form>
-          {recipe.comments.length !== 0
-            ? recipe.comments.map((comment, index) => (
-                <div key={index}>
-                  <h3>{comment.user_name}</h3>
-                  <p>{comment.text}</p>
-                </div>
-              ))
-            : null}
+          <RecipeComments recipe={recipe} />
         </>
       );
     } else {
@@ -202,27 +188,10 @@ export default function Detail() {
   if (authorization === "unauthorized") {
     if (recipe.details.title) {
       return (
-        <>
-          <div>
-            <h2>{recipe.details.title}</h2>
-            <img src={recipe.details.image} alt="" />
-            <p>Description: {recipe.details.description}</p>
-            <p>Ingredients {recipe.details.ingredients}</p>
-            <p>Instructions: {recipe.details.instructions}</p>
-            <p>Time: {recipe.details.time}</p>
-            <p>Votes: {recipe.details.votes}</p>
-            <p>Favorites: {recipe.favorites}</p>
-          </div>
-          <h2>Comments</h2>
-          {recipe.comments.length !== 0
-            ? recipe.comments.map((comment, index) => (
-                <div key={index}>
-                  <h3>{comment.user_name}</h3>
-                  <p>{comment.text}</p>
-                </div>
-              ))
-            : null}
-        </>
+        <div className="detailpage-layout">
+          <RecipeDetails recipe={recipe} />
+          <RecipeComments recipe={recipe} />
+        </div>
       );
     } else {
       return <div>Recipe loading...</div>;

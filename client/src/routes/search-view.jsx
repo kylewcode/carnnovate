@@ -5,7 +5,7 @@ import { sortByTime } from "../utils/sorts";
 import { sortByVotes } from "../utils/sorts";
 import { sortDefault } from "../utils/sorts";
 
-import Summary from "..//components/Summary";
+import Summary from "../components/Summary";
 
 import "../styles/search-view.css";
 

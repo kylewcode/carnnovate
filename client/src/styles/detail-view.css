@@ -4,8 +4,9 @@
     flex-direction: column;
     align-items: center;
     min-height: 100vh;
-    margin-top: 3rem;
+    padding-top: 3rem;
+    padding-bottom: 3rem;
     text-align: center;
-    padding: 0rem 2rem;
 }
+
 /* Non-Mobile Styles */
