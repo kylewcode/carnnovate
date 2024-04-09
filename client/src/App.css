@@ -1,10 +1,14 @@
-/* Desktop Styles */
+/* Mobile layouts */
 header {
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
-    padding: 1rem 2rem;
+    padding: 1rem 0rem;
     background-color: white;
+}
+
+header ul {
+    text-align: center;
 }
 
 footer {
@@ -15,11 +19,10 @@ footer {
 }
 
 .logo {
-    width: 150px;
+    width: 100px;
     height: auto;
-    margin-right: 1rem;
+    margin-right: 2rem;
 }
-
 
 .navigation {
     display: flex;
@@ -38,7 +41,8 @@ footer {
 }
 
 .navigation li {
-    display: inline-block;
+    display: block;
+    margin-bottom: 5px;
     font-weight: bold;
 }
 
@@ -51,15 +55,12 @@ footer {
     background-image: linear-gradient(to bottom, #dd2d4a, #9c001a);
     -moz-border-radius: 2;
     border-radius: 2px;
-    padding: 10px 10px 10px 10px;
-    margin: 0px 10px;
+    padding: 5px 0px 5px 0px;
 }
 
 .signup-button:hover, .login-button:hover {
     background: #f49cbb;
 }
-
-/* Mobile layouts */
 
 @media screen and (max-width: 700px) {
     .logo {
@@ -69,40 +70,32 @@ footer {
     }
 }
 
-@media screen and (max-width: 530px) {
+/* Non-Mobile Styles */
+@media screen and (min-width: 531px) {
     header {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        padding: 1rem 0rem;
-        background-color: white;
+        justify-content: space-between;
+        padding: 1rem 2rem;
     }
-    
-    header ul {
+
+    footer {
+        width: 100%;
+        padding: 1rem 0rem;
+        background-color: #191825;
         text-align: center;
     }
 
     .logo {
-        width: 100px;
-        height: auto;
-        margin-right: 2rem;
+        width: 150px;
+        margin-right: 1rem;
     }
 
     .navigation li {
-        display: block;
-        margin-bottom: 5px;
+        display: inline-block;
     }
 
     .signup-button, .login-button {
-        background: #dd2d4a;
-        background-image: -webkit-linear-gradient(top, #dd2d4a, #9c001a);
-        background-image: -moz-linear-gradient(top, #dd2d4a, #9c001a);
-        background-image: -ms-linear-gradient(top, #dd2d4a, #9c001a);
-        background-image: -o-linear-gradient(top, #dd2d4a, #9c001a);
-        background-image: linear-gradient(to bottom, #dd2d4a, #9c001a);
-        -moz-border-radius: 2;
-        border-radius: 2px;
-        padding: 5px 0px 5px 0px;
+        padding: 10px 10px 10px 10px;
+        margin: 0px 10px;
     }
 }
 

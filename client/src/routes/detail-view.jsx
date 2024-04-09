@@ -7,6 +7,7 @@ import {
   useActionData,
 } from "react-router-dom";
 import { getComments, getFavorites, getRecipe, getVotes } from "../utils/ajax";
+import "../styles/detail-view.css";
 
 export async function action({ params, request }) {
   const formData = await request.formData();

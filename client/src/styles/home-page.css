@@ -1,5 +1,5 @@
 .homepage-layout {
-    background-image: url("../img/homepage-bg-3-1024w.jpg");
+    background-image: url("@/img/homepage-bg-3-1024w.jpg");
     background-repeat: no-repeat;
     background-size: cover;
     background-position: center;

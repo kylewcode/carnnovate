@@ -6,6 +6,8 @@ import { getAuth } from "../utils/ajax";
 import "../App.css";
 import "../styles/home-page.css";
 
+import logo from "@/img/logo-150w.jpg";
+
 export default function Root() {
   const [authorization, setAuthorization] = useState("authorizing");
   const location = useLocation();
@@ -28,11 +30,7 @@ export default function Root() {
   return (
     <>
       <header>
-        <img
-          src="../src/img/logo-150w.jpg"
-          alt="Carnnovate logo"
-          className="logo"
-        />
+        <img src={logo} alt="Carnnovate logo" className="logo" />
         <nav className="navigation">
           <ul>
             <li>
