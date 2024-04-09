@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { Form, useParams, Navigate, useOutletContext } from "react-router-dom";
 
+import "../styles/edit-view.css";
+
 export async function action({ params, request }) {
   const formData = await request.formData();
 
@@ -39,7 +41,7 @@ export default function EditRecipe() {
 
   if (authorization === "authorized" && recipeDetails.title) {
     return (
-      <>
+      <div className="editpage-layout">
         <h2>Edit Recipe</h2>
         <Form method="post" encType="multipart/form-data">
           <label htmlFor="title">Title</label>
@@ -88,9 +90,11 @@ export default function EditRecipe() {
             defaultValue={recipeDetails.time}
           />
 
-          <button type="submit">Update recipe</button>
+          <button type="submit" className="content-button">
+            Update recipe
+          </button>
         </Form>
-      </>
+      </div>
     );
   }
 
