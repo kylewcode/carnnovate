@@ -9,4 +9,42 @@
     text-align: center;
 }
 
+.content-button {
+    background: #ffffff;
+    border: none;
+    border-radius: 2px;
+    padding: 10px;
+    text-align: center;
+    font-size: 1rem;
+    font-weight: bold;
+}
+
+.content-button:hover {
+    background: #f49cbb;
+}
+
+.detailpage-layout button:first-child {
+    margin-right: 1rem;
+}
+
+.detail-buttons-wrapper {
+    margin: 1rem 0 4rem 0;
+}
+
+form > label {
+    display: block;
+    font-size: 20px;
+    font-weight: bold;
+    margin-bottom: 1rem;
+}
+
+form > textarea {
+    margin-bottom: 1rem;
+}
+
+form > button {
+    display: block;
+    margin: auto;
+}
+
 /* Non-Mobile Styles */

@@ -135,37 +135,53 @@ export default function Detail() {
   if (authorization === "authorized") {
     if (recipe.details.title) {
       return (
-        <>
+        <div className="detailpage-layout">
           <RecipeDetails recipe={recipe} />
-          <div>
+          <div className="detail-buttons-wrapper">
             {!recipe.voted ? (
               <span>
-                <button type="button" onClick={() => voteForRecipe()}>
+                <button
+                  type="button"
+                  onClick={() => voteForRecipe()}
+                  className="content-button"
+                >
                   Vote for recipe
                 </button>
               </span>
             ) : (
               <span>
-                <button type="button" onClick={() => unvoteRecipe()}>
+                <button
+                  type="button"
+                  onClick={() => unvoteRecipe()}
+                  className="content-button"
+                >
                   Unvote recipe
                 </button>
               </span>
             )}
             {!recipe.favorited ? (
               <span>
-                <button type="button" onClick={() => favoriteRecipe()}>
-                  Favorite this!
+                <button
+                  type="button"
+                  onClick={() => favoriteRecipe()}
+                  className="content-button"
+                >
+                  Favorite this
                 </button>
               </span>
             ) : (
               <span>
-                <button type="button" onClick={() => unfavoriteRecipe()}>
-                  Unfavorite this!
+                <button
+                  type="button"
+                  onClick={() => unfavoriteRecipe()}
+                  className="content-button"
+                >
+                  Unfavorite this
                 </button>
               </span>
             )}
           </div>
-          <h2>Comments</h2>
+          <RecipeComments recipe={recipe} />
           <Form method="post" encType="multipart/form-data">
             <label htmlFor="comment">New Comment</label>
             <textarea
@@ -175,10 +191,11 @@ export default function Detail() {
               rows="10"
               placeholder="Enter comment..."
             ></textarea>
-            <button type="submit">Submit</button>
+            <button type="submit" className="content-button">
+              Submit
+            </button>
           </Form>
-          <RecipeComments recipe={recipe} />
-        </>
+        </div>
       );
     } else {
       return <div>Loading recipe...</div>;
