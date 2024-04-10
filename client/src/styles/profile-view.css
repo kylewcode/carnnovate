@@ -1,0 +1,30 @@
+.profilepage-layout {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    align-items: center;
+    justify-content: center;
+    padding: 0rem 3rem 3rem 3rem;
+    text-align: center;
+}
+
+
+.profilepage-layout a {
+    text-decoration: none;
+    color: white;
+}
+
+.profilepage-layout a:hover {
+    color: #F26A8D;
+}
+
+.profilepage-layout ul {
+    background-color: rgba(0, 0, 0, 0.50);
+    box-shadow: -6px 6px 3px 0px rgba(0,0,0,0.75);
+    padding: 5px;
+    width: 100%;
+}
+
+.profilepage-layout h2 {
+    margin-top: 2rem;
+}

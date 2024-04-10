@@ -3,6 +3,8 @@ import { Link, Navigate, useOutletContext } from "react-router-dom";
 
 import { getUser } from "../utils/ajax";
 
+import "../styles/profile-view.css";
+
 export default function Profile() {
   const userInit = {
     username: "",
@@ -28,10 +30,10 @@ export default function Profile() {
   if (authorization === "authorized") {
     if (user.username) {
       return (
-        <div>
-          <h2>{user.username}</h2>
-          <p>Profile image goes here</p>
-          <p>Recipes created</p>
+        <div className="profilepage-layout">
+          <h1>{user.username}</h1>
+          {/*Profile image goes here*/}
+          <h2>Recipes created</h2>
           <ul>
             {user.recipes.length !== 0 ? (
               user.recipes.map((recipe, index) => {
@@ -47,7 +49,7 @@ export default function Profile() {
               <p>No recipes created yet!</p>
             )}
           </ul>
-          <p>Recipes favorited</p>
+          <h2>Recipes favorited</h2>
           <ul>
             {user.favorites.length !== 0 ? (
               user.favorites.map((favorite, index) => {
