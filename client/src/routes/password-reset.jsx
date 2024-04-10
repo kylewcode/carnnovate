@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { Form, useParams, redirect } from "react-router-dom";
 
+import "../styles/password-reset.css";
+
 export async function action({ request, params }) {
   const formData = await request.formData();
   const password = formData.get("password");
@@ -49,19 +51,23 @@ export default function PasswordReset() {
 
   if (tokenIsValid) {
     return (
-      <Form method="post" encType="multipart/form-data">
-        <label htmlFor="password">Enter a new password</label>
-        <input type="password" name="password" id="password" />
-        <label htmlFor="password-confirmation">
-          Enter password again to confirm
-        </label>
-        <input
-          type="password"
-          name="password-confirmation"
-          id="password-confirmation"
-        />
-        <button type="submit">Change password</button>
-      </Form>
+      <div className="passwordresetpage-layout">
+        <Form method="post" encType="multipart/form-data">
+          <label htmlFor="password">Enter a new password</label>
+          <input type="password" name="password" id="password" />
+          <label htmlFor="password-confirmation">
+            Enter password again to confirm
+          </label>
+          <input
+            type="password"
+            name="password-confirmation"
+            id="password-confirmation"
+          />
+          <button type="submit" className="content-button">
+            Change password
+          </button>
+        </Form>
+      </div>
     );
   }
 }
