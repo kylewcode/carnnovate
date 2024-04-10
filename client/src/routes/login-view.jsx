@@ -7,6 +7,8 @@ import {
   Navigate,
 } from "react-router-dom";
 
+import "../styles/login-view.css";
+
 export async function action({ request }) {
   const formData = await request.formData();
 
@@ -35,19 +37,23 @@ export default function Login() {
 
   if (authorization === "unauthorized" || authorization === "authorizing") {
     return (
-      <>
+      <div className="loginpage-layout">
         <Form method="post" encType="multipart/form-data">
-          <label htmlFor="username">User Name</label>
-          <input type="text" id="username" name="username" />
-
-          <label htmlFor="password">Password</label>
-          <input type="password" name="password" id="password" />
-
-          <button type="submit">Login</button>
+          <div className="input-wrapper">
+            <label htmlFor="username">User Name</label>
+            <input type="text" id="username" name="username" />
+          </div>
+          <div className="input-wrapper">
+            <label htmlFor="password">Password</label>
+            <input type="password" name="password" id="password" />
+          </div>
+          <button type="submit" className="content-button">
+            Login
+          </button>
         </Form>
 
         <Link to={`request-password-reset`}>Forgot/Reset Password</Link>
-      </>
+      </div>
     );
   }
 
