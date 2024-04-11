@@ -1,11 +1,13 @@
 import { Form, redirect } from "react-router-dom";
 
+import { apiConfig } from "../../config";
+
 import "../styles/register-view.css";
 
 export async function action({ request }) {
   const formData = await request.formData();
 
-  await fetch("http://localhost:3000/register", {
+  await fetch(`${apiConfig.endpoint}/register`, {
     method: "POST",
     body: formData,
   });

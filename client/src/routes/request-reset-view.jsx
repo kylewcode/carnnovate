@@ -1,11 +1,13 @@
 import { Form } from "react-router-dom";
 
+import { apiConfig } from "../../config";
+
 import "../styles/request-reset.css";
 
 export async function action({ request }) {
   const formData = await request.formData();
 
-  await fetch("http://localhost:3000/request-reset", {
+  await fetch(`${apiConfig.endpoint}/request-reset`, {
     method: "POST",
     body: formData,
   });

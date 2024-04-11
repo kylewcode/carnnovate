@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { Form, useParams, redirect } from "react-router-dom";
 
+import { apiConfig } from "../../config";
+
 import "../styles/password-reset.css";
 
 export async function action({ request, params }) {
@@ -14,7 +16,7 @@ export async function action({ request, params }) {
     throw "Passwords do not match.";
   }
 
-  await fetch("http://localhost:3000/reset-password", {
+  await fetch(`${apiConfig.endpoint}/reset-password`, {
     method: "POST",
     body: formData,
   }).then(() => {
@@ -30,7 +32,7 @@ export default function PasswordReset() {
 
   useEffect(() => {
     const validateUser = async (token) => {
-      const res = await fetch("http://localhost:3000/token-validation", {
+      const res = await fetch(`${apiConfig.endpoint}/token-validation`, {
         method: "POST",
         body: token,
         headers: {

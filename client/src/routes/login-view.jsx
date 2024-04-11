@@ -7,12 +7,14 @@ import {
   Navigate,
 } from "react-router-dom";
 
+import { apiConfig } from "../../config";
+
 import "../styles/login-view.css";
 
 export async function action({ request }) {
   const formData = await request.formData();
 
-  const response = await fetch("http://localhost:3000/login", {
+  const response = await fetch(`${apiConfig.endpoint}/login`, {
     method: "POST",
     body: formData,
     credentials: "include",

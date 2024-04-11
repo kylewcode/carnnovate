@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Outlet, Link, useLocation } from "react-router-dom";
 
 import { getAuth } from "../utils/ajax";
+import { apiConfig } from "../../config";
 
 import "../App.css";
 import "../styles/home-page.css";
@@ -22,7 +23,7 @@ export default function Root() {
 
   const handleClick = () => {
     setAuthorization("unauthorized");
-    fetch("http://localhost:3000/logout", { credentials: "include" })
+    fetch(`${apiConfig.endpoint}`, { credentials: "include" })
       .then((response) => response.json())
       .then((json) => console.log(json.message));
   };

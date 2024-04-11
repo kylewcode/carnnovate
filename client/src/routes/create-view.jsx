@@ -1,11 +1,13 @@
 import { Form, Navigate, redirect, useOutletContext } from "react-router-dom";
 
+import { apiConfig } from "../../config";
+
 import "../styles/create-view.css";
 
 export async function action({ request }) {
   const formData = await request.formData();
 
-  await fetch("http://localhost:3000/create", {
+  await fetch(`${apiConfig.endpoint}/create`, {
     method: "POST",
     body: formData,
     credentials: "include",

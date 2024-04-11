@@ -7,6 +7,8 @@ import { sortDefault } from "../utils/sorts";
 
 import Summary from "../components/Summary";
 
+import { apiConfig } from "../../config";
+
 import "../styles/search-view.css";
 
 export default function Search() {
@@ -21,7 +23,7 @@ export default function Search() {
   const handleSearch = async () => {
     try {
       const response = await fetch(
-        `http://localhost:3000/recipes?search=${encodeURIComponent(searchText)}`
+        `${apiConfig.endpoint}/recipes?search=${encodeURIComponent(searchText)}`
       );
       const recipes = await response.json();
       setSearchResults(recipes);

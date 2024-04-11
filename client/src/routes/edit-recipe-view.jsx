@@ -1,12 +1,14 @@
 import { useState, useEffect } from "react";
 import { Form, useParams, Navigate, useOutletContext } from "react-router-dom";
 
+import { apiConfig } from "../../config";
+
 import "../styles/edit-view.css";
 
 export async function action({ params, request }) {
   const formData = await request.formData();
 
-  await fetch(`http://localhost:3000/update-recipe/${params.recipeId}`, {
+  await fetch(`${apiConfig.endpoint}/update-recipe/${params.recipeId}`, {
     method: "POST",
     body: formData,
     credentials: "include",
@@ -25,7 +27,7 @@ export default function EditRecipe() {
   useEffect(() => {
     const getRecipeDetails = async () => {
       const res = await fetch(
-        `http://localhost:3000/get-recipe-details/${recipeId}`
+        `${apiConfig.endpoint}/get-recipe-details/${recipeId}`
       );
       const recipeDetails = await res.json();
 

@@ -11,19 +11,21 @@ import { getComments, getFavorites, getRecipe, getVotes } from "../utils/ajax";
 import RecipeDetails from "../components/RecipeDetails";
 import RecipeComments from "../components/RecipeComments";
 
+import { apiConfig } from "../../config";
+
 import "../styles/detail-view.css";
 
 export async function action({ params, request }) {
   const formData = await request.formData();
   const commentText = formData.get("comment");
 
-  await fetch(`http://localhost:3000/add-comment/${params.recipeId}`, {
+  await fetch(`${apiConfig.endpoint}/add-comment/${params.recipeId}`, {
     method: "POST",
     credentials: "include",
     body: formData,
   });
 
-  const res = await fetch("http://localhost:3000/get-username", {
+  const res = await fetch(`${apiConfig.endpoint}/get-username`, {
     credentials: "include",
   });
   const data = await res.json();
@@ -72,7 +74,7 @@ export default function Detail() {
 
   const favoriteRecipe = async () => {
     const res = await fetch(
-      `http://localhost:3000/favorite-recipe/${recipe.id}`,
+      `${apiConfig.endpoint}/favorite-recipe/${recipe.id}`,
       {
         credentials: "include",
       }
@@ -89,7 +91,7 @@ export default function Detail() {
 
   const unfavoriteRecipe = async () => {
     const res = await fetch(
-      `http://localhost:3000/unfavorite-recipe/${recipe.id}`,
+      `${apiConfig.endpoint}/unfavorite-recipe/${recipe.id}`,
       {
         credentials: "include",
       }
@@ -105,7 +107,7 @@ export default function Detail() {
   };
 
   const voteForRecipe = async () => {
-    const res = await fetch(`http://localhost:3000/vote/${recipe.id}`, {
+    const res = await fetch(`${apiConfig.endpoint}/vote/${recipe.id}`, {
       credentials: "include",
     });
 
@@ -119,7 +121,7 @@ export default function Detail() {
   };
 
   const unvoteRecipe = async () => {
-    const res = await fetch(`http://localhost:3000/unvote/${recipe.id}`, {
+    const res = await fetch(`${apiConfig.endpoint}/unvote/${recipe.id}`, {
       credentials: "include",
     });
 
