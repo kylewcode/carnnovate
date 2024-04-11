@@ -1,5 +1,7 @@
 import { Form, redirect } from "react-router-dom";
 
+import "../styles/register-view.css";
+
 export async function action({ request }) {
   const formData = await request.formData();
 
@@ -14,13 +16,17 @@ export async function action({ request }) {
 
 export default function Register() {
   return (
-    <Form method="post" encType="multipart/form-data">
-      <label htmlFor="user-name">User Name</label>
+    <Form
+      method="post"
+      encType="multipart/form-data"
+      className="registerpage-layout"
+    >
+      <label htmlFor="user-name">Username</label>
       <input
         type="text"
         id="user-name"
         name="user-name"
-        placeholder="Enter your name"
+        placeholder="Enter your username"
       />
 
       <label htmlFor="email">Email</label>
@@ -47,7 +53,9 @@ export default function Register() {
         placeholder="Reenter your password"
       />
 
-      <button type="submit">Submit</button>
+      <button type="submit" className="content-button">
+        Submit
+      </button>
     </Form>
   );
 }
