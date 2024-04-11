@@ -12,7 +12,7 @@ const mysql = require("mysql");
 const session = require("express-session");
 const MySQLStore = require("express-mysql-session")(session);
 const localDomain = "http://localhost:5173";
-// const prodDomain = "netlifydomain"
+const prodDomain = "https://carnnovate.netlify.app";
 
 const poolOptions = {
   connectionLimit: 10,
@@ -41,7 +41,7 @@ const bcrypt = require("bcrypt");
 const saltRounds = 10;
 
 const corsOptions = {
-  origin: localDomain,
+  origin: prodDomain,
   optionsSuccessStatus: 200,
   credentials: true,
 };
@@ -452,7 +452,7 @@ app.post("/request-reset", upload.none(), (req, res) => {
                 if (error) throw error;
 
                 console.log("Encoded token stored successfully!");
-                const link = `${localDomain}/password-reset/${encodedHash}`;
+                const link = `${prodDomain}/password-reset/${encodedHash}`;
 
                 // If local dev, populate text file with link.
                 const filename = "password-reset-email-body.txt";
