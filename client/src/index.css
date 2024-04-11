@@ -32,3 +32,18 @@ ul {
     margin: 0px;
     padding: 0px;
 }
+
+.content-button {
+    background: #ffffff;
+    border: none;
+    border-radius: 2px;
+    padding: 10px;
+    text-align: center;
+    font-size: 1rem;
+    font-weight: bold;
+    color: black;
+}
+
+.content-button:hover {
+    background: #f49cbb;
+}
