@@ -11,10 +11,10 @@ const port = process.env.PORT || 3000;
 const mysql = require("mysql");
 const session = require("express-session");
 const MySQLStore = require("express-mysql-session")(session);
-// Local
-// const domain = "http://localhost:5173";
-// Production
-const domain = "https://carnnovate.netlify.app";
+const isProduction = app.get("env") === "production";
+const domain = isProduction
+  ? "https://carnnovate.netlify.app"
+  : "http://localhost:5173";
 
 const poolOptions = {
   connectionLimit: 10,
@@ -56,12 +56,11 @@ app.use(
     resave: false,
     saveUninitialized: false,
     cookie: {
-      secure: true,
+      secure: isProduction ? true : false,
       httpOnly: true,
       maxAge: 1000 * 60 * 60 * 24, // One day in milliseconds
-      domain: domain,
       path: "/",
-      sameSite: "none",
+      sameSite: "lax",
     },
   })
 );

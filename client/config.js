@@ -1,6 +1,7 @@
+const isProduction = import.meta.env.PROD;
+
 export const apiConfig = {
-  // Local
-  //   endpoint: "http://localhost:3000",
-  //   Production
-  endpoint: "https://carnnovate.herokuapp.com",
+  endpoint: isProduction
+    ? "https://carnnovate.herokuapp.com"
+    : "http://localhost:3000",
 };
