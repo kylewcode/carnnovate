@@ -56,7 +56,7 @@ app.use(
     resave: false,
     saveUninitialized: false,
     cookie: {
-      secure: false,
+      secure: isProduction ? true : false,
       httpOnly: true,
       maxAge: 1000 * 60 * 60 * 24, // One day in milliseconds
       path: "/",
