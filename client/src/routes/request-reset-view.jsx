@@ -1,5 +1,7 @@
 import { Form } from "react-router-dom";
 
+import "../styles/request-reset.css";
+
 export async function action({ request }) {
   const formData = await request.formData();
 
@@ -17,7 +19,11 @@ export async function action({ request }) {
 
 export default function RequestReset() {
   return (
-    <Form method="post" encType="multipart/form-data">
+    <Form
+      method="post"
+      encType="multipart/form-data"
+      className="requestresetpage-layout"
+    >
       <label htmlFor="email">Enter your email.</label>
       <input type="email" name="email" id="email" />
 
