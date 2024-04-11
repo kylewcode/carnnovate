@@ -27,7 +27,9 @@ export default function RequestReset() {
       <label htmlFor="email">Enter your email.</label>
       <input type="email" name="email" id="email" />
 
-      <button type="submit">Submit</button>
+      <button type="submit" className="content-button">
+        Submit
+      </button>
     </Form>
   );
 }
