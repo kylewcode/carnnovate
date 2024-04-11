@@ -1,6 +1,8 @@
+import { apiConfig } from "../../config";
+
 export const getAuth = async () => {
   try {
-    const res = await fetch("http://localhost:3000/auth", {
+    const res = await fetch(`${apiConfig.endpoint}/auth`, {
       credentials: "include",
     });
     const auth = await res.json();
@@ -12,7 +14,7 @@ export const getAuth = async () => {
 };
 
 export const getUser = async () => {
-  const res = await fetch("http://localhost:3000/get-user", {
+  const res = await fetch(`${apiConfig.endpoint}/get-user`, {
     credentials: "include",
   });
   const user = await res.json();
@@ -22,7 +24,7 @@ export const getUser = async () => {
 
 export const getComments = async (recipeId) => {
   try {
-    const res = await fetch(`http://localhost:3000/get-comments/${recipeId}`, {
+    const res = await fetch(`${apiConfig.endpoint}/get-comments/${recipeId}`, {
       credentials: "include",
     });
     const comments = await res.json();
@@ -35,7 +37,7 @@ export const getComments = async (recipeId) => {
 
 export const getFavorites = async (recipeId) => {
   try {
-    const res = await fetch(`http://localhost:3000/get-favorites/${recipeId}`, {
+    const res = await fetch(`${apiConfig.endpoint}/get-favorites/${recipeId}`, {
       credentials: "include",
     });
     const favorites = await res.json();
@@ -49,7 +51,7 @@ export const getFavorites = async (recipeId) => {
 export const getRecipe = async (recipeId) => {
   try {
     const res = await fetch(
-      `http://localhost:3000/get-recipe-details/${recipeId}`,
+      `${apiConfig.endpoint}/get-recipe-details/${recipeId}`,
       {
         credentials: "include",
       }
@@ -64,7 +66,7 @@ export const getRecipe = async (recipeId) => {
 
 export const getVotes = async (recipeId) => {
   try {
-    const res = await fetch(`http://localhost:3000/get-votes/${recipeId}`, {
+    const res = await fetch(`${apiConfig.endpoint}/get-votes/${recipeId}`, {
       credentials: "include",
     });
     const votes = await res.json();
