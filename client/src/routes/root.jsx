@@ -23,7 +23,7 @@ export default function Root() {
 
   const handleClick = () => {
     setAuthorization("unauthorized");
-    fetch(`${apiConfig.endpoint}`, { credentials: "include" })
+    fetch(`${apiConfig.endpoint}/logout`, { credentials: "include" })
       .then((response) => response.json())
       .then((json) => console.log(json.message));
   };

@@ -12,9 +12,9 @@ const mysql = require("mysql");
 const session = require("express-session");
 const MySQLStore = require("express-mysql-session")(session);
 // Local
-// const domain = "http://localhost:5173";
+const domain = "http://localhost:5173";
 // Production
-const domain = "https://carnnovate.netlify.app";
+// const domain = "https://carnnovate.netlify.app";
 
 const poolOptions = {
   connectionLimit: 10,
