@@ -56,10 +56,12 @@ app.use(
     resave: false,
     saveUninitialized: false,
     cookie: {
-      secure: false,
+      secure: true,
       httpOnly: true,
+      maxAge: 1000 * 60 * 60 * 24, // One day in milliseconds
+      domain: domain,
       path: "/",
-      sameSite: "lax",
+      sameSite: "none",
     },
   })
 );
