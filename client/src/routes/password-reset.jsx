@@ -51,23 +51,25 @@ export default function PasswordReset() {
 
   if (tokenIsValid) {
     return (
-      <div className="passwordresetpage-layout">
-        <Form method="post" encType="multipart/form-data">
-          <label htmlFor="password">Enter a new password</label>
-          <input type="password" name="password" id="password" />
-          <label htmlFor="password-confirmation">
-            Enter password again to confirm
-          </label>
-          <input
-            type="password"
-            name="password-confirmation"
-            id="password-confirmation"
-          />
-          <button type="submit" className="content-button">
-            Change password
-          </button>
-        </Form>
-      </div>
+      <Form
+        method="post"
+        encType="multipart/form-data"
+        className="passwordresetpage-layout"
+      >
+        <label htmlFor="password">Enter a new password</label>
+        <input type="password" name="password" id="password" />
+        <label htmlFor="password-confirmation">
+          Enter password again to confirm
+        </label>
+        <input
+          type="password"
+          name="password-confirmation"
+          id="password-confirmation"
+        />
+        <button type="submit" className="content-button">
+          Change password
+        </button>
+      </Form>
     );
   }
 }

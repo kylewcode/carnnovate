@@ -77,7 +77,10 @@ export default function Root() {
         {location.pathname === "/" && (
           <div className="site-title">
             <h1>Carnnovate</h1>
-            <h2>A user-driven recipe database for the Carnivore Diet</h2>
+            <h2>
+              Innovative Carnivores: A user-driven recipe database for the
+              Carnivore Diet
+            </h2>
           </div>
         )}
         <Outlet context={[authorization, setAuthorization]} />
