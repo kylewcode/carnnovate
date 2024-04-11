@@ -3,11 +3,14 @@
     flex-direction: column;
     height: 100vh;
     align-items: center;
-    justify-content: center;
-    padding: 0rem 3rem 3rem 3rem;
+    justify-content: flex-start;
+    padding: 0rem 1.25rem 1.25rem 1.25rem;
     text-align: center;
 }
 
+.profilepage-layout li {
+    margin-bottom: 0.25rem;
+}
 
 .profilepage-layout a {
     text-decoration: none;
@@ -21,10 +24,29 @@
 .profilepage-layout ul {
     background-color: rgba(0, 0, 0, 0.50);
     box-shadow: -6px 6px 3px 0px rgba(0,0,0,0.75);
-    padding: 5px;
+    padding: 0.55rem;
     width: 100%;
+}
+
+.profilepage-layout h1 {
+    margin-bottom: 0;
 }
 
 .profilepage-layout h2 {
     margin-top: 2rem;
+}
+
+@media screen and (min-width: 531px) {
+    .profilepage-layout {
+        height: min-content;
+    }
+
+    .profilepage-layout li {
+        margin-bottom: 1rem;
+    }
+
+    .profilepage-layout ul {
+        width: 80%;
+        padding-top: 1rem;
+    }
 }

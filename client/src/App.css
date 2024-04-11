@@ -12,6 +12,7 @@ header ul {
 }
 
 footer {
+    position
     width: 100%;
     padding: 1rem 0rem;
     background-color: #191825;
@@ -91,13 +92,6 @@ footer {
     header {
         justify-content: space-between;
         padding: 1rem 2rem;
-    }
-
-    footer {
-        width: 100%;
-        padding: 1rem 0rem;
-        background-color: #191825;
-        text-align: center;
     }
 
     .logo {
