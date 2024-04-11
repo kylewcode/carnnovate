@@ -7,7 +7,7 @@ const multer = require("multer");
 const upload = multer({ dest: "uploads/" });
 const cors = require("cors");
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000;
 const mysql = require("mysql");
 const session = require("express-session");
 const MySQLStore = require("express-mysql-session")(session);
@@ -589,5 +589,5 @@ app.post("/add-comment/:recipeId", upload.none(), (req, res) => {
 });
 
 app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`);
+  console.log(`Listening on port ${port}`);
 });
