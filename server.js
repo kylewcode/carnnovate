@@ -64,9 +64,7 @@ app.use(
       httpOnly: true,
       maxAge: 1000 * 60 * 60 * 24, // One day in milliseconds
       path: "/",
-      domain: domain, // Adding domain does not resolve cookie issue
-      // sameSite: isProduction ? "none" : "lax",
-      sameSite: "lax",
+      sameSite: isProduction ? "none" : "lax", // lax setting for production does not solve issue
     },
   })
 );
