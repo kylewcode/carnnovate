@@ -64,6 +64,7 @@ app.use(
       httpOnly: true,
       maxAge: 1000 * 60 * 60 * 24, // One day in milliseconds
       path: "/",
+      domain: domain,
       sameSite: isProduction ? "none" : "lax",
     },
   })
