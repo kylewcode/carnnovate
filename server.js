@@ -12,6 +12,10 @@ const mysql = require("mysql");
 const session = require("express-session");
 const MySQLStore = require("express-mysql-session")(session);
 const isProduction = app.get("env") === "production";
+console.log("Environment is production: ", isProduction);
+// Production preview
+// const domain = "http://localhost:4173";
+// Deployment and development
 const domain = isProduction
   ? "https://carnnovate.netlify.app"
   : "http://localhost:5173";
@@ -382,6 +386,9 @@ app.post("/login", upload.none(), (req, res) => {
         req.session.user_id = userId;
         req.session.email = email;
         req.session.username = username;
+
+        // (session contains user_id email and username props 60%)(True)
+        console.log(req.session);
 
         res.status(200).send({ message: "User logged in", isAuthorized: true });
       } else {

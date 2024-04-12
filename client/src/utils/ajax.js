@@ -6,7 +6,8 @@ export const getAuth = async () => {
       credentials: "include",
     });
     const auth = await res.json();
-
+    // (auth.isAuthorized will be false prior to login 99%)(True)
+    console.log("ajax.js getAuth auth.isAuthorized is ", auth.isAuthorized);
     return auth.isAuthorized;
   } catch (error) {
     console.error(error);
