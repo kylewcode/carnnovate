@@ -13,6 +13,7 @@ const session = require("express-session");
 const MySQLStore = require("express-mysql-session")(session);
 const isProduction = app.get("env") === "production";
 console.log("Environment is production: ", isProduction);
+isProduction ? app.set("trust proxy", 1) : null;
 // Production preview
 // const domain = "http://localhost:4173";
 // Deployment and development
