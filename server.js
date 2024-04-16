@@ -63,10 +63,8 @@ app.use(
     cookie: {
       secure: isProduction ? true : false,
       httpOnly: true,
-      maxAge: 1000 * 60 * 60 * 24, // One day in milliseconds
-      path: "/",
-      sameSite: isProduction ? "none" : "lax", // lax setting for production does not solve issue
-    },
+      maxAge: 1000 * 60 * 60 * 24,
+      sameSite: isProduction ? "none" : "lax",
   })
 );
 
@@ -388,8 +386,7 @@ app.post("/login", upload.none(), (req, res) => {
         req.session.email = email;
         req.session.username = username;
 
-        // (session contains user_id email and username props 60%)(True)
-        console.log(req.session);
+        console.log("Session created: ", req.session);
 
         res.status(200).send({ message: "User logged in", isAuthorized: true });
       } else {
@@ -445,7 +442,6 @@ app.post("/request-reset", upload.none(), (req, res) => {
       bcrypt.hash(stringToHash, saltRounds, (err, hash) => {
         if (err) throw err;
 
-        // Delete previous token for user if it exists
         pool.query(
           "DELETE from tokens WHERE user_id = ?",
           [userId],
@@ -593,8 +589,6 @@ app.post("/add-comment/:recipeId", upload.none(), (req, res) => {
 
   pool.query(query, commentDetails, (error, results) => {
     if (error) throw error;
-    // Return the comment that was added. Could modify insert query to include subquery.
-    console.log(results);
 
     res.status(200).send("Comment added.");
   });

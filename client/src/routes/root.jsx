@@ -10,13 +10,10 @@ import "../styles/home-page.css";
 import logo from "@/img/logo-150w.jpg";
 
 export default function Root() {
-  // (authorization will be false on 1st homepage load 99%)(False "authorizing")
   const [authorization, setAuthorization] = useState("authorizing");
-  console.log("Root authorization state is: ", authorization);
   const location = useLocation();
 
   useEffect(() => {
-    console.log("Root useEffect invoked");
     getAuth().then((isAuthorized) =>
       isAuthorized
         ? setAuthorization("authorized")
