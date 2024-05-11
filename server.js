@@ -18,7 +18,7 @@ isProduction ? app.set("trust proxy", 1) : null;
 // const domain = "http://localhost:4173";
 // Deployment and development
 const domain = isProduction
-  ? "https://carnnovate-3f0bf51c9f93.herokuapp.com"
+  ? "https://app-carnnovate-1883dcdf3389.herokuapp.com"
   : "http://localhost:5173";
 
 const poolOptions = {
