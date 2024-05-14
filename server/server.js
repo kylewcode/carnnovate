@@ -15,11 +15,11 @@ const isProduction = app.get("env") === "production";
 console.log("Environment is production: ", isProduction);
 isProduction ? app.set("trust proxy", 1) : null;
 // Production preview
-// const domain = "http://localhost:4173";
+const domain = "http://localhost:4173";
 // Deployment and development
-const domain = isProduction
-  ? "https://carnnovate.netlify.app"
-  : "http://localhost:5173";
+// const domain = isProduction
+//   ? "https://carnnovate-4fb4882151ae.herokuapp.com"
+//   : "http://localhost:5173";
 
 const poolOptions = {
   connectionLimit: 10,
@@ -73,12 +73,12 @@ app.get("/", (req, res) => {
   res.send(`Hello World`);
 });
 
-app.get("/get-username", (req, res) => {
+app.get("/api/get-username", (req, res) => {
   const username = req.session.username;
   res.status(200).send({ user_name: username });
 });
 
-app.get("/recipes", (req, res) => {
+app.get("/api/recipes", (req, res) => {
   const searchText = req.query.search;
 
   if (searchText === "") {
@@ -104,7 +104,7 @@ app.get("/recipes", (req, res) => {
   }
 });
 
-app.get("/auth", (req, res) => {
+app.get("/api/auth", (req, res) => {
   if (req.session.user_id) {
     res.status(200).send({ isAuthorized: true });
   } else {
@@ -112,7 +112,7 @@ app.get("/auth", (req, res) => {
   }
 });
 
-app.get("/logout", (req, res) => {
+app.get("/api/logout", (req, res) => {
   req.session.destroy(function (err) {
     if (err) {
       res
@@ -124,7 +124,7 @@ app.get("/logout", (req, res) => {
   });
 });
 
-app.get("/get-user", (req, res) => {
+app.get("/api/get-user", (req, res) => {
   const username = req.session.username;
   const userId = req.session.user_id;
   const recipeQuery = `
@@ -158,7 +158,7 @@ app.get("/get-user", (req, res) => {
   });
 });
 
-app.get("/get-recipe-details/:recipeId", (req, res) => {
+app.get("/api/get-recipe-details/:recipeId", (req, res) => {
   const recipeId = req.params.recipeId;
   const query = `
   SELECT * from recipes
@@ -172,7 +172,7 @@ app.get("/get-recipe-details/:recipeId", (req, res) => {
   });
 });
 
-app.get("/get-comments/:recipeId", (req, res) => {
+app.get("/api/get-comments/:recipeId", (req, res) => {
   const recipeId = req.params.recipeId;
   const commentQuery = `
     SELECT comments.text, users.user_name FROM comments
@@ -188,7 +188,7 @@ app.get("/get-comments/:recipeId", (req, res) => {
   });
 });
 
-app.get("/get-favorites/:recipeId", (req, res) => {
+app.get("/api/get-favorites/:recipeId", (req, res) => {
   const recipeId = req.params.recipeId;
   const favoriteQuery = `
   SELECT COUNT(*) AS count FROM favorites
@@ -229,7 +229,7 @@ app.get("/get-favorites/:recipeId", (req, res) => {
   });
 });
 
-app.get("/favorite-recipe/:recipeId", (req, res) => {
+app.get("/api/favorite-recipe/:recipeId", (req, res) => {
   const recipeId = req.params.recipeId;
   const userId = req.session.user_id;
   const query = `
@@ -245,7 +245,7 @@ app.get("/favorite-recipe/:recipeId", (req, res) => {
   });
 });
 
-app.get("/unfavorite-recipe/:recipeId", (req, res) => {
+app.get("/api/unfavorite-recipe/:recipeId", (req, res) => {
   const recipeId = req.params.recipeId;
   const userId = req.session.user_id;
   const query = `
@@ -261,7 +261,7 @@ app.get("/unfavorite-recipe/:recipeId", (req, res) => {
   });
 });
 
-app.get("/get-votes/:recipeId", (req, res) => {
+app.get("/api/get-votes/:recipeId", (req, res) => {
   const recipeId = req.params.recipeId;
   const voteQuery = `
   SELECT COUNT(*) AS count FROM votes
@@ -304,7 +304,7 @@ app.get("/get-votes/:recipeId", (req, res) => {
   });
 });
 
-app.get("/vote/:recipeId", (req, res) => {
+app.get("/api/vote/:recipeId", (req, res) => {
   const recipeId = req.params.recipeId;
   const userId = req.session.user_id;
   const query = `
@@ -320,7 +320,7 @@ app.get("/vote/:recipeId", (req, res) => {
   });
 });
 
-app.get("/unvote/:recipeId", (req, res) => {
+app.get("/api/unvote/:recipeId", (req, res) => {
   const recipeId = req.params.recipeId;
   const userId = req.session.user_id;
   const query = `
@@ -336,7 +336,7 @@ app.get("/unvote/:recipeId", (req, res) => {
   });
 });
 
-app.post("/register", upload.none(), (req, res) => {
+app.post("/api/register", upload.none(), (req, res) => {
   const {
     "user-name": userName,
     email,
@@ -366,7 +366,7 @@ app.post("/register", upload.none(), (req, res) => {
   });
 });
 
-app.post("/login", upload.none(), (req, res) => {
+app.post("/api/login", upload.none(), (req, res) => {
   const { username, password } = req.body;
   const query = `
     SELECT * FROM users
@@ -403,7 +403,7 @@ app.post("/login", upload.none(), (req, res) => {
   });
 });
 
-app.post("/create", upload.none(), (req, res) => {
+app.post("/api/create", upload.none(), (req, res) => {
   const { title, description, ingredients, instructions, time } = req.body;
   const userId = req.session.user_id;
   const query = `
@@ -426,7 +426,7 @@ app.post("/create", upload.none(), (req, res) => {
   });
 });
 
-app.post("/request-reset", upload.none(), (req, res) => {
+app.post("/api/request-reset", upload.none(), (req, res) => {
   const email = req.body.email;
   const query = `
     SELECT * FROM users
@@ -478,7 +478,7 @@ app.post("/request-reset", upload.none(), (req, res) => {
   });
 });
 
-app.post("/token-validation", express.text(), (req, res) => {
+app.post("/api/token-validation", express.text(), (req, res) => {
   const encodedToken = encodeURIComponent(req.body);
   const query = `SELECT * FROM tokens WHERE token = "${encodedToken}"`;
 
@@ -495,7 +495,7 @@ app.post("/token-validation", express.text(), (req, res) => {
   });
 });
 
-app.post("/reset-password", upload.none(), (req, res) => {
+app.post("/api/reset-password", upload.none(), (req, res) => {
   const {
     password,
     "password-confirmation": passwordConfirmation,
@@ -550,7 +550,7 @@ app.post("/reset-password", upload.none(), (req, res) => {
   );
 });
 
-app.post("/update-recipe/:recipeId", upload.none(), (req, res) => {
+app.post("/api/update-recipe/:recipeId", upload.none(), (req, res) => {
   const { title, ingredients, description, time, instructions } = req.body;
   const { recipeId } = req.params;
   const query = `
@@ -578,7 +578,7 @@ app.post("/update-recipe/:recipeId", upload.none(), (req, res) => {
   });
 });
 
-app.post("/add-comment/:recipeId", upload.none(), (req, res) => {
+app.post("/api/add-comment/:recipeId", upload.none(), (req, res) => {
   const recipeId = req.params.recipeId;
   const userId = req.session.user_id;
   const text = req.body.comment;

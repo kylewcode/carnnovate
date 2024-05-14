@@ -3,6 +3,6 @@ console.log("Environment is production: ", isProduction);
 
 export const apiConfig = {
   endpoint: isProduction
-    ? "https://carnnovate.herokuapp.com"
-    : "http://localhost:3000",
+    ? "https://carnnovate-4fb4882151ae.herokuapp.com/api"
+    : "http://localhost:3000/api",
 };
