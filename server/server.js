@@ -15,11 +15,11 @@ const isProduction = app.get("env") === "production";
 console.log("Environment is production: ", isProduction);
 isProduction ? app.set("trust proxy", 1) : null;
 // Production preview
-const domain = "http://localhost:4173";
+// const domain = "http://localhost:4173";
 // Deployment and development
-// const domain = isProduction
-//   ? "https://carnnovate-4fb4882151ae.herokuapp.com"
-//   : "http://localhost:5173";
+const domain = isProduction
+  ? "https://carnnovate-4fb4882151ae.herokuapp.com"
+  : "http://localhost:5173";
 
 const poolOptions = {
   connectionLimit: 10,
