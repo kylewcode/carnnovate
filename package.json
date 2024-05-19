@@ -3,8 +3,7 @@
   "version": "1.0.0",
   "description": "Recipe database for the Carnivore diet.",
   "scripts": {
-    "serve-api": "cd server && npm run server",
-    "serve-client": "cd client && npm run serve",
+    "serve": "cd server && npm run server",
     "heroku-postbuild": "cd server && npm install && cd ../client && npm install && npm run build",
     "test": "echo \"Error: no test specified\" && exit 1"
   },

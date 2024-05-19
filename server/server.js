@@ -1,4 +1,5 @@
 require("dotenv").config();
+const path = require("path");
 const { appendToFile, clearFile } = require("./utils/fs");
 const { HOST, USER, DB_PASSWORD, DB, LONG_RANDOM_STRING } = process.env;
 const express = require("express");
@@ -69,7 +70,7 @@ app.use(
   })
 );
 
-app.get("/", (req, res) => {
+app.get("/api", (req, res) => {
   res.send(`Hello World`);
 });
 
@@ -594,6 +595,14 @@ app.post("/api/add-comment/:recipeId", upload.none(), (req, res) => {
     res.status(200).send("Comment added.");
   });
 });
+
+if (isProduction) {
+  app.use(express.static(path.join(__dirname, "../client/dist")));
+
+  app.get("*", (req, res) => {
+    res.sendFile(path.join(__dirname, "..client/dist/index.html"));
+  });
+}
 
 app.listen(port, () => {
   console.log(`Listening on port ${port}`);
