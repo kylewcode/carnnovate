@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 
-import dummyThumbnail from "@/img/dummy-thumbnail-75x75.png";
+import dummyThumbnail from "@/img/recipe-icon-75x75.png";
 
 import "../styles/summary.css";
 
