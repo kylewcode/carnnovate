@@ -596,6 +596,18 @@ app.post("/api/add-comment/:recipeId", upload.none(), (req, res) => {
   });
 });
 
+app.delete("/api/delete-recipe/:recipeId", (req, res) => {
+  const recipeId = req.params.recipeId;
+
+  const query = `DELETE FROM recipes WHERE recipe_id = ?`;
+
+  pool.query(query, recipeId, (error, results) => {
+    if (error) throw error;
+
+    res.status(200).send({ message: `Recipe of id ${recipeId} deleted.` });
+  });
+});
+
 if (isProduction) {
   app.use(express.static(path.join(__dirname, "../client/dist")));
 

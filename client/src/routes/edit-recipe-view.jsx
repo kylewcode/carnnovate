@@ -1,7 +1,14 @@
 import { useState, useEffect } from "react";
-import { Form, useParams, Navigate, useOutletContext } from "react-router-dom";
+import {
+  Form,
+  useParams,
+  Navigate,
+  useNavigate,
+  useOutletContext,
+} from "react-router-dom";
 
 import { apiConfig } from "../../config";
+import { deleteRecipe } from "../utils/ajax";
 
 import "../styles/edit-view.css";
 
@@ -21,6 +28,7 @@ export async function action({ params, request }) {
 
 export default function EditRecipe() {
   const recipeId = useParams().recipeId;
+  const navigate = useNavigate();
   const [authorization, setAuthorization] = useOutletContext();
   const [recipeDetails, setRecipeDetails] = useState({});
 
@@ -36,6 +44,17 @@ export default function EditRecipe() {
 
     getRecipeDetails();
   }, [recipeId]);
+
+  const handleClick = async () => {
+    // Prompt
+    if (window.confirm("Do you really want to delete this recipe?")) {
+      // Delete recipe
+      const message = await deleteRecipe(recipeId);
+      console.log(message);
+      // Navigate user to profile
+      navigate("/profile");
+    }
+  };
 
   if (authorization === "authorized" && !recipeDetails.title) {
     return <div>Loading recipe...</div>;
@@ -94,6 +113,13 @@ export default function EditRecipe() {
 
           <button type="submit" className="content-button">
             Update recipe
+          </button>
+          <button
+            type="button"
+            className="content-button"
+            onClick={handleClick}
+          >
+            Delete recipe
           </button>
         </Form>
       </div>

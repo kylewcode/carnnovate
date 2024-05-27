@@ -76,3 +76,17 @@ export const getVotes = async (recipeId) => {
     console.error(error);
   }
 };
+
+export const deleteRecipe = async (recipeId) => {
+  try {
+    const res = await fetch(`${apiConfig.endpoint}/delete-recipe/${recipeId}`, {
+      method: "DELETE",
+      credentials: "include",
+    });
+    const message = await res.json();
+
+    return message;
+  } catch (error) {
+    console.error(error);
+  }
+};
