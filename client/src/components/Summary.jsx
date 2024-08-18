@@ -2,8 +2,6 @@ import { Link } from "react-router-dom";
 
 import dummyThumbnail from "@/img/recipe-icon-75x75.png";
 
-import "../styles/summary.css";
-
 function Summary({ recipe }) {
   return (
     <li className="card">

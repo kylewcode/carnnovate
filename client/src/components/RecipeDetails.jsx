@@ -1,5 +1,3 @@
-import "../styles/recipe-details.css";
-
 function RecipeDetails({ recipe }) {
   return (
     <div className="recipe-details-layout">

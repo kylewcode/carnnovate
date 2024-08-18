@@ -5,7 +5,6 @@ import { getAuth } from "../utils/ajax";
 import { apiConfig } from "../../config";
 
 import "../App.css";
-import "../styles/home-page.css";
 
 import logo from "@/img/logo-150w.jpg";
 

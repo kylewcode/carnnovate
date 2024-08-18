@@ -3,8 +3,6 @@ import { Form, useParams, redirect } from "react-router-dom";
 
 import { apiConfig } from "../../config";
 
-import "../styles/password-reset.css";
-
 export async function action({ request, params }) {
   const formData = await request.formData();
   const password = formData.get("password");

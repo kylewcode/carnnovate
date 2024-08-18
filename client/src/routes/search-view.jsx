@@ -9,8 +9,6 @@ import Summary from "../components/Summary";
 
 import { apiConfig } from "../../config";
 
-import "../styles/search-view.css";
-
 export default function Search() {
   const initSearchtext = sessionStorage.getItem("searchText") || "";
   const initSortState = sessionStorage.getItem("sortState") || "sort-none";

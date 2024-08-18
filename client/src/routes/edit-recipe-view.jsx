@@ -10,8 +10,6 @@ import {
 import { apiConfig } from "../../config";
 import { deleteRecipe } from "../utils/ajax";
 
-import "../styles/edit-view.css";
-
 export async function action({ params, request }) {
   const formData = await request.formData();
 

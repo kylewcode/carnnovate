@@ -1,7 +1,7 @@
 require("dotenv").config();
 const path = require("path");
 const { appendToFile, clearFile } = require("./utils/fs");
-const { HOST, USER, DB_PASSWORD, DB, LONG_RANDOM_STRING } = process.env;
+const { HOST, APP_USER, DB_PASSWORD, DB, LONG_RANDOM_STRING } = process.env;
 const express = require("express");
 const bodyParser = require("body-parser");
 const multer = require("multer");
@@ -25,7 +25,7 @@ const domain = isProduction
 const poolOptions = {
   connectionLimit: 10,
   host: HOST,
-  user: USER,
+  user: APP_USER,
   password: DB_PASSWORD,
   database: DB,
 };
@@ -34,7 +34,7 @@ const pool = mysql.createPool(poolOptions);
 const storeOptions = {
   host: HOST,
   port: 3306,
-  user: USER,
+  user: APP_USER,
   password: DB_PASSWORD,
   database: DB,
 };

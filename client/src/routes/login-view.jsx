@@ -9,8 +9,6 @@ import {
 
 import { apiConfig } from "../../config";
 
-import "../styles/login-view.css";
-
 export async function action({ request }) {
   const formData = await request.formData();
 

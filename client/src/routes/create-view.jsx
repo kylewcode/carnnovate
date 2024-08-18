@@ -2,8 +2,6 @@ import { Form, Navigate, redirect, useOutletContext } from "react-router-dom";
 
 import { apiConfig } from "../../config";
 
-import "../styles/create-view.css";
-
 export async function action({ request }) {
   const formData = await request.formData();
 

@@ -1,5 +1,3 @@
-import "../styles/recipe-comments.css";
-
 function RecipeComments({ recipe }) {
   return (
     <div className="recipe-comments-layout">

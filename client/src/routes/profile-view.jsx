@@ -3,8 +3,6 @@ import { Link, Navigate, useOutletContext } from "react-router-dom";
 
 import { getUser } from "../utils/ajax";
 
-import "../styles/profile-view.css";
-
 export default function Profile() {
   const userInit = {
     username: "",
