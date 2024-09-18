@@ -596,6 +596,10 @@ app.post("/api/add-comment/:recipeId", upload.none(), (req, res) => {
   });
 });
 
+app.post("/api/upload-images", (req, res) => {
+  res.status(200).send({ message: "/api/upload-images SUCCESS" });
+});
+
 app.delete("/api/delete-recipe/:recipeId", (req, res) => {
   const recipeId = req.params.recipeId;
 

@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Form, Navigate, redirect, useOutletContext } from "react-router-dom";
 
 import { apiConfig } from "../../config";
@@ -15,8 +16,10 @@ export async function action({ request }) {
   return redirect("/search");
 }
 
-export default function Create() {
+export default function Create({ FilePond }) {
   const [authorization] = useOutletContext();
+  const [files, setFiles] = useState([]);
+  console.log(files); // array of objects representing uploaded files. Objects contain functions.
 
   if (authorization === "authorized") {
     return (
@@ -29,7 +32,15 @@ export default function Create() {
         <input type="text" name="title" id="title" />
 
         <label htmlFor="image">Upload image</label>
-        <input type="file" name="image" id="image" />
+        <FilePond
+          files={files} // A list of file locations that should be loaded Immediately
+          onupdatefiles={setFiles} // setFiles must be defined somewhere because the files state is being updated.
+          allowMultiple={true}
+          maxFiles={3}
+          server={`${apiConfig.endpoint}/upload-images`}
+          name="files" /* sets the file input name, it's filepond by default */
+          labelIdle='Drag & Drop your files or <span class="filepond--label-action">Browse</span>'
+        />
 
         <label htmlFor="description">Description</label>
         <textarea

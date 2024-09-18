@@ -24,11 +24,12 @@ export async function action({ params, request }) {
   return null;
 }
 
-export default function EditRecipe() {
+export default function EditRecipe({ FilePond }) {
   const recipeId = useParams().recipeId;
   const navigate = useNavigate();
   const [authorization, setAuthorization] = useOutletContext();
   const [recipeDetails, setRecipeDetails] = useState({});
+  const [files, setFiles] = useState([]);
 
   useEffect(() => {
     const getRecipeDetails = async () => {
@@ -72,7 +73,15 @@ export default function EditRecipe() {
           />
 
           <label htmlFor="image">Upload image</label>
-          <input type="file" name="image" id="image" />
+          <FilePond
+            files={files}
+            onupdatefiles={setFiles}
+            allowMultiple={true}
+            maxFiles={3}
+            server={`${apiConfig.endpoint}/upload-images`}
+            name="files" /* sets the file input name, it's filepond by default */
+            labelIdle='Drag & Drop your files or <span class="filepond--label-action">Browse</span>'
+          />
 
           <label htmlFor="description">Description</label>
           <textarea

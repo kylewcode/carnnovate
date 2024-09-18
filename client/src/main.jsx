@@ -1,6 +1,16 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 
+import { FilePond, registerPlugin } from "react-filepond";
+
+import "filepond/dist/filepond.min.css";
+
+import FilePondPluginImageExifOrientation from "filepond-plugin-image-exif-orientation";
+import FilePondPluginImagePreview from "filepond-plugin-image-preview";
+import "filepond-plugin-image-preview/dist/filepond-plugin-image-preview.css";
+
+registerPlugin(FilePondPluginImageExifOrientation, FilePondPluginImagePreview);
+
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 
 import Root from "./routes/root";
@@ -44,7 +54,7 @@ const router = createBrowserRouter([
       },
       {
         path: "create",
-        element: <Create />,
+        element: <Create FilePond={FilePond} />,
         action: createAction,
       },
       {
@@ -73,7 +83,7 @@ const router = createBrowserRouter([
       },
       {
         path: "profile/edit-recipe/:recipeId",
-        element: <EditRecipe />,
+        element: <EditRecipe FilePond={FilePond} />,
         action: editRecipeAction,
       },
     ],
