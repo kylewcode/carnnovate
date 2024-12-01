@@ -1,8 +1,11 @@
 const fs = require("fs");
+const { promises, mkdtemp, rename } = fs;
+const os = require("os");
+const { tmpdir } = os;
 
 async function appendToFile(filename, text) {
   try {
-    await fs.promises.appendFile(filename, text);
+    await promises.appendFile(filename, text);
     console.log(`Text appended to ${filename}`);
   } catch (error) {
     console.error(`Error appending to file: ${error.message}`);
@@ -10,8 +13,13 @@ async function appendToFile(filename, text) {
 }
 
 async function clearFile(filename) {
-  await fs.promises.writeFile(filename, "");
+  await promises.writeFile(filename, "");
 }
 
-module.exports.appendToFile = appendToFile;
-module.exports.clearFile = clearFile;
+module.exports = {
+  appendToFile,
+  clearFile,
+  mkdtemp,
+  tmpdir,
+  rename,
+};

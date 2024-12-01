@@ -1,6 +1,12 @@
 require("dotenv").config();
 const path = require("path");
-const { appendToFile, clearFile } = require("./utils/fs");
+const {
+  appendToFile,
+  clearFile,
+  mkdtemp,
+  tmpdir,
+  rename,
+} = require("./utils/fs");
 const { HOST, APP_USER, DB_PASSWORD, DB, LONG_RANDOM_STRING } = process.env;
 const express = require("express");
 const bodyParser = require("body-parser");
@@ -46,6 +52,7 @@ sessionStore
   .catch((error) => console.error(error));
 
 const bcrypt = require("bcrypt");
+const { dir } = require("console");
 const saltRounds = 10;
 
 const corsOptions = {
@@ -388,7 +395,7 @@ app.post("/api/login", upload.none(), (req, res) => {
         req.session.email = email;
         req.session.username = username;
 
-        console.log("Session created: ", req.session);
+        // console.log("Session created: ", req.session);
 
         res.status(200).send({ message: "User logged in", isAuthorized: true });
       } else {
@@ -596,8 +603,32 @@ app.post("/api/add-comment/:recipeId", upload.none(), (req, res) => {
   });
 });
 
-app.post("/api/upload-images", (req, res) => {
-  res.status(200).send({ message: "/api/upload-images SUCCESS" });
+mkdtemp(path.join(tmpdir(), "temp-"), (err, directory) => {
+  if (err) throw err;
+
+  app.post("/api/upload-images", upload.array("files", 12), (req, res) => {
+    const paths = [];
+    const filenames = [];
+
+    req.files.forEach((file) => {
+      paths.push(file.path);
+      filenames.push(file.filename);
+    });
+
+    for (let i = 0; i < paths.length; i++) {
+      const path = paths[i];
+      const filename = filenames[i];
+
+      rename(path, `${directory}/${filename}`, function (err) {
+        if (err) console.log(`Error: ${err}`);
+      });
+    }
+
+    /* Upload to S3 */
+
+    // server returns unique location id 12345 in text/plain response
+    res.status(200).send({ message: "/api/upload-images route complete" });
+  });
 });
 
 app.delete("/api/delete-recipe/:recipeId", (req, res) => {
