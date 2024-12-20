@@ -37,7 +37,10 @@ export default function Create({ FilePond }) {
           onupdatefiles={setFiles} // setFiles must be defined somewhere because the files state is being updated.
           allowMultiple={true}
           maxFiles={3}
-          server={`${apiConfig.endpoint}/upload-images`}
+          server={{
+            url: `${apiConfig.endpoint}/upload-images`,
+            withCredentials: true,
+          }}
           name="files" /* sets the file input name, it's filepond by default */
           labelIdle='Drag & Drop your files or <span class="filepond--label-action">Browse</span>'
         />

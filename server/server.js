@@ -634,22 +634,24 @@ async function main() {
 
         // 1. Upload to S3
         // Upload to bucket
+        console.log("session info", req.session);
         const { user_id: userId } = req.session;
-        const key = `user_${userId}_${fileName}_${Date.now()}`;
-        const fileHandle = await openFileHandle(newPath, "r");
-        const readStream = fileHandle.createReadStream();
+        console.log("userId", userId);
+        // const key = `user_${userId}_${fileName}_${Date.now()}`;
+        // const fileHandle = await openFileHandle(newPath, "r");
+        // const readStream = fileHandle.createReadStream();
 
-        await s3Client.send(
-          new PutObjectCommand({
-            Bucket: "carnnovate-s3-b8a8aa18-8042-41b0-9935-55b91b1014a8",
-            Key: key,
-            Body: readStream,
-          })
-        );
+        // await s3Client.send(
+        //   new PutObjectCommand({
+        //     Bucket: "carnnovate-s3-b8a8aa18-8042-41b0-9935-55b91b1014a8",
+        //     Key: key,
+        //     Body: readStream,
+        //   })
+        // );
 
-        console.log("File uploaded to S3: ", key);
+        // console.log("File uploaded to S3: ", key);
 
-        await fileHandle.close();
+        // await fileHandle.close();
 
         // 2. Store S3 Object URL in JawsDB
         // Retrieve object url from S3
