@@ -83,6 +83,10 @@ export default function EditRecipe({ FilePond }) {
             files={files}
             onupdatefiles={setFiles}
             allowMultiple={false}
+            allowFileTypeValidation={true}
+            labelFileTypeNotAllowed="File type is invalid. Please please upload jpeg, png, or gif file types only."
+            fileValidateTypeLabelExpectedTypes="Expects {allButLastType} or {lastType}"
+            acceptedFileTypes={["image/jpeg", "image/png", "image/gif"]}
             server={{
               url: `${apiConfig.endpoint}/upload-images`,
               process: {
@@ -90,7 +94,7 @@ export default function EditRecipe({ FilePond }) {
               },
             }}
             name="image"
-            labelIdle='Drag & Drop your files or <span class="filepond--label-action">Browse</span>'
+            labelIdle='Drag & Drop your image or <span class="filepond--label-action">Browse</span>'
           />
 
           <label htmlFor="description">Description</label>
