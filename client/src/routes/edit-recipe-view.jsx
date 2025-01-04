@@ -45,12 +45,11 @@ export default function EditRecipe({ FilePond }) {
   }, [recipeId]);
 
   const handleClick = async () => {
-    // Prompt
     if (window.confirm("Do you really want to delete this recipe?")) {
-      // Delete recipe
       const message = await deleteRecipe(recipeId);
+
       console.log(message);
-      // Navigate user to profile
+
       navigate("/profile");
     }
   };
@@ -72,14 +71,25 @@ export default function EditRecipe({ FilePond }) {
             defaultValue={recipeDetails.title}
           />
 
-          <label htmlFor="image">Upload image</label>
+          <p>Current image</p>
+          <img src={recipeDetails.image} alt={recipeDetails.title} />
+          <input
+            type="hidden"
+            name="old_image_url"
+            value={recipeDetails.image}
+          />
+          <label htmlFor="image">Upload new image</label>
           <FilePond
             files={files}
             onupdatefiles={setFiles}
-            allowMultiple={true}
-            maxFiles={3}
-            server={`${apiConfig.endpoint}/upload-images`}
-            name="files" /* sets the file input name, it's filepond by default */
+            allowMultiple={false}
+            server={{
+              url: `${apiConfig.endpoint}/upload-images`,
+              process: {
+                withCredentials: true,
+              },
+            }}
+            name="image"
             labelIdle='Drag & Drop your files or <span class="filepond--label-action">Browse</span>'
           />
 

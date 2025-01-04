@@ -1,8 +1,12 @@
+// 3. Client receives url from server and displays image.
 function RecipeDetails({ recipe }) {
   return (
     <div className="recipe-details-layout">
       <h1>{recipe.details.title}</h1>
-      {/* <img src={recipe.details.image} alt="" /> */}
+      <img
+        src={recipe.details.image}
+        alt={`Image of ${recipe.details.title}`}
+      />
       <div className="separator"></div>
       <h2>Description</h2>
       <p>{recipe.details.description}</p>

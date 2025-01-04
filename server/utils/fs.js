@@ -53,10 +53,40 @@ async function openFileHandle(filepath, flag) {
   }
 }
 
+async function deleteTempFile(path) {
+  try {
+    return await promises.unlink(path);
+  } catch (error) {
+    console.error(`Error deleting temporary file: ${error.message}`);
+  }
+}
+
+async function checkFileDeletion(path) {
+  try {
+    await promises.access(path);
+    return {
+      status: "failed",
+      message: `File still exists at path: ${path}`,
+    };
+  } catch (error) {
+    if (error.code === "ENOENT") {
+      return {
+        status: "success",
+        message: `File at path ${path} successfully deleted.`,
+      };
+    } else {
+      console.error(`Unexpected error: ${error.message}`);
+      return { status: "error", message: error.message };
+    }
+  }
+}
+
 module.exports = {
   appendToFile,
   clearFile,
   createTempDir,
   renameFile,
   openFileHandle,
+  deleteTempFile,
+  checkFileDeletion,
 };

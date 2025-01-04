@@ -6,8 +6,13 @@ const {
   createTempDir,
   renameFile,
   openFileHandle,
+  deleteTempFile,
+  checkFileDeletion,
 } = require("./utils/fs");
-const { HOST, APP_USER, DB_PASSWORD, DB, LONG_RANDOM_STRING } = process.env;
+const crypto = require("crypto");
+const createUUID = crypto.randomUUID;
+const { HOST, APP_USER, DB_PASSWORD, DB, LONG_RANDOM_STRING, AWS_REGION } =
+  process.env;
 const express = require("express");
 const bodyParser = require("body-parser");
 const multer = require("multer");
@@ -19,7 +24,11 @@ const mysql = require("mysql");
 const session = require("express-session");
 const MySQLStore = require("express-mysql-session")(session);
 
-const { S3Client, PutObjectCommand } = require("@aws-sdk/client-s3");
+const {
+  S3Client,
+  PutObjectCommand,
+  DeleteObjectCommand,
+} = require("@aws-sdk/client-s3");
 const s3Client = new S3Client({});
 
 const isProduction = app.get("env") === "production";
@@ -31,6 +40,7 @@ isProduction ? app.set("trust proxy", 1) : null;
 const domain = isProduction
   ? "https://carnnovate-4fb4882151ae.herokuapp.com"
   : "http://localhost:5173";
+const imageCDNurl = "https://d3db7jqhdyx8x1.cloudfront.net/";
 
 const poolOptions = {
   connectionLimit: 10,
@@ -423,26 +433,79 @@ async function main() {
   });
 
   app.post("/api/create", upload.none(), (req, res) => {
-    const { title, description, ingredients, instructions, time } = req.body;
-    const userId = req.session.user_id;
-    const query = `
-  INSERT INTO recipes (user_id, title, description, ingredients, time, instructions)
-  VALUES (?, ?, ?, ?, ?, ?)
-  `;
-    const recipeAttributes = [
-      userId,
+    const {
       title,
       description,
       ingredients,
-      time,
       instructions,
-    ];
+      time,
+      image: locationID,
+    } = req.body;
+    const tempImageQuery = `SELECT file_path, current_filename, original_filename FROM temp_images
+                        WHERE unique_id = ?;`;
+    const tempImageVars = [locationID];
 
-    pool.query(query, recipeAttributes, function (error, results) {
-      if (error) throw error;
+    pool.query(
+      tempImageQuery,
+      tempImageVars,
+      async (tempImageError, tempImageResults) => {
+        if (tempImageError) throw tempImageError;
 
-      res.status(200).send("Recipe submitted");
-    });
+        const { file_path: filePath, current_filename: currentFileName } =
+          tempImageResults[0];
+
+        const { user_id: userId } = req.session;
+        const bucketName = "carnnovate-s3-b8a8aa18-8042-41b0-9935-55b91b1014a8";
+        const key = `user_${userId}_${currentFileName}_${Date.now()}`;
+        const fileHandle = await openFileHandle(filePath, "r");
+        const readStream = fileHandle.createReadStream();
+
+        await s3Client.send(
+          new PutObjectCommand({
+            Bucket: bucketName,
+            Key: key,
+            Body: readStream,
+          })
+        );
+
+        console.log("File uploaded to S3: ", key);
+
+        await fileHandle.close();
+
+        await deleteTempFile(filePath);
+        const { status, message } = await checkFileDeletion(filePath);
+        if (status === "failed" || status === "error") {
+          throw new Error(
+            `There was an issue verifying that the temporary file was deleted at path: ${path} | ${status}: ${message}`
+          );
+        }
+
+        const createQuery = `
+            INSERT INTO recipes (user_id, title, description, ingredients, time, instructions, image)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+            `;
+        const image = imageCDNurl + key;
+        const createVars = [
+          userId,
+          title,
+          description,
+          ingredients,
+          time,
+          instructions,
+          image,
+        ];
+
+        pool.query(
+          createQuery,
+          createVars,
+          function (createError, createResults) {
+            if (createError) throw createError;
+
+            res.status(200).send("Recipe submitted");
+          }
+        );
+      }
+    );
   });
 
   app.post("/api/request-reset", upload.none(), (req, res) => {
@@ -570,31 +633,90 @@ async function main() {
   });
 
   app.post("/api/update-recipe/:recipeId", upload.none(), (req, res) => {
-    const { title, ingredients, description, time, instructions } = req.body;
-    const { recipeId } = req.params;
-    const query = `
-  UPDATE recipes 
-  SET title = ?, 
-  ingredients = ?, 
-  description = ?, 
-  time = ?, 
-  instructions = ? 
-  WHERE (recipe_id = ?);
-  `;
-    const recipeDetails = [
+    const {
       title,
       ingredients,
       description,
       time,
       instructions,
-      recipeId,
-    ];
+      image: locationID,
+      old_image_url: oldImageURL,
+    } = req.body;
+    const { recipeId } = req.params;
+    const tempImageQuery = `SELECT file_path, current_filename, original_filename FROM temp_images
+                        WHERE unique_id = ?;`;
+    const tempImageVars = [locationID];
 
-    pool.query(query, recipeDetails, (error, results) => {
-      if (error) throw error;
+    pool.query(
+      tempImageQuery,
+      tempImageVars,
+      async (tempImageError, tempImageResults) => {
+        if (tempImageError) throw tempImageError;
 
-      res.status(200).send("Recipe updated.");
-    });
+        const { file_path: filePath, current_filename: currentFileName } =
+          tempImageResults[0];
+
+        const { user_id: userId } = req.session;
+        const bucketName = "carnnovate-s3-b8a8aa18-8042-41b0-9935-55b91b1014a8";
+        const key = `user_${userId}_${currentFileName}_${Date.now()}`;
+        const fileHandle = await openFileHandle(filePath, "r");
+        const readStream = fileHandle.createReadStream();
+
+        await s3Client.send(
+          new PutObjectCommand({
+            Bucket: bucketName,
+            Key: key,
+            Body: readStream,
+          })
+        );
+
+        console.log("File uploaded to S3: ", key);
+
+        await fileHandle.close();
+
+        await deleteTempFile(filePath);
+        const { status, message } = await checkFileDeletion(filePath);
+        if (status === "failed" || status === "error") {
+          throw new Error(
+            `There was an issue verifying that the temporary file was deleted at path: ${path} | ${status}: ${message}`
+          );
+        }
+
+        const index = oldImageURL.search(".net/") + 5;
+        const oldKey = oldImageURL.slice(index);
+
+        await s3Client.send(
+          new DeleteObjectCommand({ Bucket: bucketName, Key: oldKey })
+        );
+
+        const updateQuery = `
+            UPDATE recipes
+            SET title = ?,
+            ingredients = ?,
+            description = ?,
+            time = ?,
+            instructions = ?,
+            image = ?
+            WHERE (recipe_id = ?);
+          `;
+        const image = imageCDNurl + key;
+        const updateVars = [
+          title,
+          ingredients,
+          description,
+          time,
+          instructions,
+          image,
+          recipeId,
+        ];
+
+        pool.query(updateQuery, updateVars, (updateError, updateResults) => {
+          if (updateError) throw updateError;
+
+          res.status(200).send("Recipe updated.");
+        });
+      }
+    );
   });
 
   app.post("/api/add-comment/:recipeId", upload.none(), (req, res) => {
@@ -614,67 +736,65 @@ async function main() {
     });
   });
 
-  app.post(
-    "/api/upload-images",
-    upload.array("files", 12),
-    async (req, res) => {
-      // For each file
-      req.files.forEach(async (file) => {
-        // Store in temporary location
-        // (file will be an object with a path and filename property 99%)()
-        console.log(file);
-        const { path: oldPath, filename: fileName } = file;
-        // (fileName will contain the exact name of the file uploaded 99%)(True)
-        console.log(fileName);
-        const newPath = `${tempDir}/${fileName}`;
-        // (newPath will equal '{tempDir}/{fileName}' 99%)(True)
-        console.log(newPath);
+  // 1. FilePond uploads file my-file.jpg as multipart/form-data using a POST request
+  app.post("/api/upload-images", upload.single("image"), async (req, res) => {
+    try {
+      // 2. server saves file to unique location tmp/12345/my-file.jpg
+      const {
+        path: oldPath,
+        filename: fileName,
+        originalname: originalName,
+      } = req.file;
+      const newPath = `${tempDir}/${fileName}`;
 
-        await renameFile(oldPath, newPath);
+      await renameFile(oldPath, newPath);
 
-        // 1. Upload to S3
-        // Upload to bucket
-        console.log("session info", req.session);
-        const { user_id: userId } = req.session;
-        console.log("userId", userId);
-        // const key = `user_${userId}_${fileName}_${Date.now()}`;
-        // const fileHandle = await openFileHandle(newPath, "r");
-        // const readStream = fileHandle.createReadStream();
+      // 3. server returns unique location id 12345 in text/plain response
+      //// Save id and file path to table
+      const uniqueID = createUUID();
+      const query = `INSERT INTO temp_images (unique_id, file_path, current_filename, original_filename)
+                     VALUES (?, ?, ?, ?);`;
+      const queryVars = [uniqueID, newPath, fileName, originalName];
 
-        // await s3Client.send(
-        //   new PutObjectCommand({
-        //     Bucket: "carnnovate-s3-b8a8aa18-8042-41b0-9935-55b91b1014a8",
-        //     Key: key,
-        //     Body: readStream,
-        //   })
-        // );
+      pool.query(query, queryVars, (error, results) => {
+        if (error) throw error;
 
-        // console.log("File uploaded to S3: ", key);
-
-        // await fileHandle.close();
-
-        // 2. Store S3 Object URL in JawsDB
-        // Retrieve object url from S3
-        // Store that to the db
-
-        // 3. Clean up temp dir. (Rely on Heroku for this or explicitly delete it.)
+        res.set("Content-Type", "text/plain");
+        res.status(200).send(uniqueID);
       });
-
-      /* FilePond */
-      // server returns unique location id 12345 in text/plain response
-      res.status(200).send({ message: "/api/upload-images route complete" });
+    } catch (error) {
+      console.error("Error uploading file:", error);
+      res.status(500).json({ error: "Failed to upload file" });
     }
-  );
+  });
 
   app.delete("/api/delete-recipe/:recipeId", (req, res) => {
     const recipeId = req.params.recipeId;
+    const bucketName = "carnnovate-s3-b8a8aa18-8042-41b0-9935-55b91b1014a8"; // not DRY
+    const imageURLquery = `SELECT image FROM recipes WHERE recipe_id = ?`;
+    const imageURLvars = [recipeId];
 
-    const query = `DELETE FROM recipes WHERE recipe_id = ?`;
-
-    pool.query(query, recipeId, (error, results) => {
+    pool.query(imageURLquery, imageURLvars, async (error, results) => {
       if (error) throw error;
 
-      res.status(200).send({ message: `Recipe of id ${recipeId} deleted.` });
+      console.log(results[0]);
+      const { image } = results[0];
+
+      const index = image.search(".net/") + 5;
+      const oldKey = image.slice(index);
+      console.log(oldKey);
+
+      await s3Client.send(
+        new DeleteObjectCommand({ Bucket: bucketName, Key: oldKey })
+      );
+
+      const query = `DELETE FROM recipes WHERE recipe_id = ?`;
+
+      pool.query(query, recipeId, (error, results) => {
+        if (error) throw error;
+
+        res.status(200).send({ message: `Recipe of id ${recipeId} deleted.` });
+      });
     });
   });
 

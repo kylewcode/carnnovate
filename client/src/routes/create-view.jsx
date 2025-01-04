@@ -11,6 +11,7 @@ export async function action({ request }) {
     body: formData,
     credentials: "include",
   });
+
   window.alert("Recipe submitted!");
 
   return redirect("/search");
@@ -19,7 +20,6 @@ export async function action({ request }) {
 export default function Create({ FilePond }) {
   const [authorization] = useOutletContext();
   const [files, setFiles] = useState([]);
-  console.log(files); // array of objects representing uploaded files. Objects contain functions.
 
   if (authorization === "authorized") {
     return (
@@ -33,15 +33,16 @@ export default function Create({ FilePond }) {
 
         <label htmlFor="image">Upload image</label>
         <FilePond
-          files={files} // A list of file locations that should be loaded Immediately
-          onupdatefiles={setFiles} // setFiles must be defined somewhere because the files state is being updated.
-          allowMultiple={true}
-          maxFiles={3}
+          files={files}
+          onupdatefiles={setFiles}
+          allowMultiple={false}
           server={{
             url: `${apiConfig.endpoint}/upload-images`,
-            withCredentials: true,
+            process: {
+              withCredentials: true,
+            },
           }}
-          name="files" /* sets the file input name, it's filepond by default */
+          name="image"
           labelIdle='Drag & Drop your files or <span class="filepond--label-action">Browse</span>'
         />
 
