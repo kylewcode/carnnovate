@@ -11,8 +11,15 @@ const {
 } = require("./utils/fs");
 const crypto = require("crypto");
 const createUUID = crypto.randomUUID;
-const { HOST, APP_USER, DB_PASSWORD, DB, LONG_RANDOM_STRING, AWS_REGION } =
-  process.env;
+const {
+  HOST,
+  APP_USER,
+  DB_PASSWORD,
+  DB,
+  LONG_RANDOM_STRING,
+  AWS_REGION,
+  BUCKET_NAME,
+} = process.env;
 const express = require("express");
 const bodyParser = require("body-parser");
 const multer = require("multer");
@@ -455,7 +462,7 @@ async function main() {
           tempImageResults[0];
 
         const { user_id: userId } = req.session;
-        const bucketName = "carnnovate-s3-b8a8aa18-8042-41b0-9935-55b91b1014a8";
+        const bucketName = BUCKET_NAME;
         const key = `user_${userId}_${currentFileName}_${Date.now()}`;
         const fileHandle = await openFileHandle(filePath, "r");
         const readStream = fileHandle.createReadStream();
@@ -657,7 +664,7 @@ async function main() {
           tempImageResults[0];
 
         const { user_id: userId } = req.session;
-        const bucketName = "carnnovate-s3-b8a8aa18-8042-41b0-9935-55b91b1014a8";
+        const bucketName = BUCKET_NAME;
         const key = `user_${userId}_${currentFileName}_${Date.now()}`;
         const fileHandle = await openFileHandle(filePath, "r");
         const readStream = fileHandle.createReadStream();
@@ -770,7 +777,7 @@ async function main() {
 
   app.delete("/api/delete-recipe/:recipeId", (req, res) => {
     const recipeId = req.params.recipeId;
-    const bucketName = "carnnovate-s3-b8a8aa18-8042-41b0-9935-55b91b1014a8"; // not DRY
+    const bucketName = BUCKET_NAME;
     const imageURLquery = `SELECT image FROM recipes WHERE recipe_id = ?`;
     const imageURLvars = [recipeId];
 

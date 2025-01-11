@@ -76,7 +76,7 @@ export default function EditRecipe({ FilePond }) {
           <input
             type="hidden"
             name="old_image_url"
-            value={recipeDetails.image}
+            value={recipeDetails.image || undefined}
           />
           <label htmlFor="image">Upload new image</label>
           <FilePond
