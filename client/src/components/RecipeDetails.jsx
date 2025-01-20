@@ -1,4 +1,3 @@
-// 3. Client receives url from server and displays image.
 function RecipeDetails({ recipe }) {
   return (
     <div className="recipe-details-layout">

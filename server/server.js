@@ -202,7 +202,9 @@ async function main() {
     pool.query(query, (error, results) => {
       if (error) throw error;
 
-      res.status(200).send(results[0]);
+      res
+        .status(200)
+        .send({ details: results[0], isFound: results.length > 0 });
     });
   });
 

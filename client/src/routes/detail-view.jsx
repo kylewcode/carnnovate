@@ -5,6 +5,7 @@ import {
   useOutletContext,
   useLoaderData,
   useActionData,
+  Navigate,
 } from "react-router-dom";
 import { getComments, getFavorites, getRecipe, getVotes } from "../utils/ajax";
 
@@ -34,7 +35,7 @@ export async function action({ params, request }) {
 }
 
 export async function loader({ params }) {
-  const details = await getRecipe(params.recipeId);
+  const { details, isFound } = await getRecipe(params.recipeId);
   const comments = await getComments(params.recipeId);
   const favorites = await getFavorites(params.recipeId);
   const votes = await getVotes(params.recipeId);
@@ -44,11 +45,18 @@ export async function loader({ params }) {
     details: details,
     favorites: favorites,
     votes: votes,
+    isFound: isFound,
   };
 }
 
 export default function Detail() {
-  const { comments, details, favorites, votes } = useLoaderData();
+  const {
+    comments,
+    details,
+    favorites,
+    votes,
+    isFound: recipeIsFound,
+  } = useLoaderData();
   const newComment = useActionData();
   const [authorization, setAuthorization] = useOutletContext();
   const initRecipe = {
@@ -132,90 +140,107 @@ export default function Detail() {
     }
   };
 
-  if (authorization === "authorized") {
-    if (recipe.details.title) {
-      return (
-        <div className="detailpage-layout">
-          <RecipeDetails recipe={recipe} />
-          <div className="detail-buttons-wrapper">
-            {!recipe.voted ? (
-              <span>
-                <button
-                  type="button"
-                  onClick={() => voteForRecipe()}
-                  className="content-button"
-                >
-                  Vote for recipe
-                </button>
-              </span>
-            ) : (
-              <span>
-                <button
-                  type="button"
-                  onClick={() => unvoteRecipe()}
-                  className="content-button"
-                >
-                  Unvote recipe
-                </button>
-              </span>
-            )}
-            {!recipe.favorited ? (
-              <span>
-                <button
-                  type="button"
-                  onClick={() => favoriteRecipe()}
-                  className="content-button"
-                >
-                  Favorite this
-                </button>
-              </span>
-            ) : (
-              <span>
-                <button
-                  type="button"
-                  onClick={() => unfavoriteRecipe()}
-                  className="content-button"
-                >
-                  Unfavorite this
-                </button>
-              </span>
-            )}
+  // if recipe is found, display it
+  // Else redirect user.
+  if (recipeIsFound) {
+    if (authorization === "authorized") {
+      if (recipe.details.title) {
+        return (
+          <div className="detailpage-layout">
+            <RecipeDetails recipe={recipe} />
+            <div className="detail-buttons-wrapper">
+              {!recipe.voted ? (
+                <span>
+                  <button
+                    type="button"
+                    onClick={() => voteForRecipe()}
+                    className="content-button"
+                  >
+                    Vote for recipe
+                  </button>
+                </span>
+              ) : (
+                <span>
+                  <button
+                    type="button"
+                    onClick={() => unvoteRecipe()}
+                    className="content-button"
+                  >
+                    Unvote recipe
+                  </button>
+                </span>
+              )}
+              {!recipe.favorited ? (
+                <span>
+                  <button
+                    type="button"
+                    onClick={() => favoriteRecipe()}
+                    className="content-button"
+                  >
+                    Favorite this
+                  </button>
+                </span>
+              ) : (
+                <span>
+                  <button
+                    type="button"
+                    onClick={() => unfavoriteRecipe()}
+                    className="content-button"
+                  >
+                    Unfavorite this
+                  </button>
+                </span>
+              )}
+            </div>
+            <RecipeComments recipe={recipe} />
+            <Form method="post" encType="multipart/form-data">
+              <label htmlFor="comment">New Comment</label>
+              <textarea
+                name="comment"
+                id="comment"
+                cols="30"
+                rows="10"
+                placeholder="Enter comment..."
+              ></textarea>
+              <button type="submit" className="content-button">
+                Submit
+              </button>
+            </Form>
           </div>
-          <RecipeComments recipe={recipe} />
-          <Form method="post" encType="multipart/form-data">
-            <label htmlFor="comment">New Comment</label>
-            <textarea
-              name="comment"
-              id="comment"
-              cols="30"
-              rows="10"
-              placeholder="Enter comment..."
-            ></textarea>
-            <button type="submit" className="content-button">
-              Submit
-            </button>
-          </Form>
-        </div>
-      );
-    } else {
-      return <div>Loading recipe...</div>;
+        );
+      } else {
+        return <div>Loading recipe...</div>;
+      }
     }
-  }
 
-  if (authorization === "unauthorized") {
-    if (recipe.details.title) {
-      return (
-        <div className="detailpage-layout">
-          <RecipeDetails recipe={recipe} />
-          <RecipeComments recipe={recipe} />
-        </div>
-      );
-    } else {
-      return <div>Recipe loading...</div>;
+    if (authorization === "unauthorized") {
+      if (recipe.details.title) {
+        return (
+          <div className="detailpage-layout">
+            <RecipeDetails recipe={recipe} />
+            <RecipeComments recipe={recipe} />
+          </div>
+        );
+      } else {
+        return <div>Recipe loading...</div>;
+      }
     }
-  }
 
-  if (authorization === "authorizing") {
-    return <div>Authorizing...</div>;
+    if (authorization === "authorizing") {
+      return <div>Authorizing...</div>;
+    }
+  } else {
+    {
+      window.alert(
+        "The recipe is no longer available as it may have been deleted by its author."
+      );
+    }
+    return (
+      <Navigate
+        to={"/search"}
+        replace={true}
+        state={{ needsSearchUpdate: true }}
+      />
+    );
   }
 }

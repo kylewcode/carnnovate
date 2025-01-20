@@ -8,7 +8,7 @@ import {
 } from "react-router-dom";
 
 import { apiConfig } from "../../config";
-import { deleteRecipe } from "../utils/ajax";
+import { deleteRecipe, getRecipe } from "../utils/ajax";
 
 export async function action({ params, request }) {
   const formData = await request.formData();
@@ -33,12 +33,9 @@ export default function EditRecipe({ FilePond }) {
 
   useEffect(() => {
     const getRecipeDetails = async () => {
-      const res = await fetch(
-        `${apiConfig.endpoint}/get-recipe-details/${recipeId}`
-      );
-      const recipeDetails = await res.json();
+      const { details } = await getRecipe(recipeId);
 
-      setRecipeDetails(recipeDetails);
+      setRecipeDetails(details);
     };
 
     getRecipeDetails();

@@ -1,4 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+
+import { useLocation } from "react-router-dom";
 
 import { sortByTitle } from "../utils/sorts";
 import { sortByTime } from "../utils/sorts";
@@ -10,6 +12,8 @@ import Summary from "../components/Summary";
 import { apiConfig } from "../../config";
 
 export default function Search() {
+  const { state } = useLocation();
+  const needsSearchUpdate = state?.needsSearchUpdate;
   const initSearchtext = sessionStorage.getItem("searchText") || "";
   const initSortState = sessionStorage.getItem("sortState") || "sort-none";
   const initSearchState = JSON.parse(sessionStorage.getItem("search")) || [];
@@ -29,6 +33,10 @@ export default function Search() {
       console.log(error);
     }
   };
+
+  useEffect(() => {
+    if (needsSearchUpdate) handleSearch();
+  }, []);
 
   const handleKeyUp = (e) => {
     if (e.key === "Enter") {
