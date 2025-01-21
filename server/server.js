@@ -100,7 +100,6 @@ app.use(
 
 async function main() {
   const tempDir = await createTempDir();
-  console.log("tempDir init:", tempDir);
 
   app.get("/api", (req, res) => {
     res.send(`Hello World`);
@@ -780,12 +779,9 @@ async function main() {
     pool.query(imageURLquery, imageURLvars, async (error, results) => {
       if (error) throw error;
 
-      console.log(results[0]);
       const { image } = results[0];
-
       const index = image.search(".net/") + 5;
       const oldKey = image.slice(index);
-      console.log(oldKey);
 
       await s3Client.send(
         new DeleteObjectCommand({ Bucket: bucketName, Key: oldKey })
