@@ -423,8 +423,6 @@ async function main() {
           req.session.email = email;
           req.session.username = username;
 
-          // console.log("Session created: ", req.session);
-
           res
             .status(200)
             .send({ message: "User logged in", isAuthorized: true });
@@ -745,10 +743,8 @@ async function main() {
     });
   });
 
-  // 1. FilePond uploads file my-file.jpg as multipart/form-data using a POST request
   app.post("/api/upload-images", upload.single("image"), async (req, res) => {
     try {
-      // 2. server saves file to unique location tmp/12345/my-file.jpg
       const {
         path: oldPath,
         filename: fileName,
@@ -758,8 +754,6 @@ async function main() {
 
       await renameFile(oldPath, newPath);
 
-      // 3. server returns unique location id 12345 in text/plain response
-      //// Save id and file path to table
       const uniqueID = createUUID();
       const query = `INSERT INTO temp_images (unique_id, file_path, current_filename, original_filename)
                      VALUES (?, ?, ?, ?);`;

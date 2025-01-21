@@ -140,8 +140,6 @@ export default function Detail() {
     }
   };
 
-  // if recipe is found, display it
-  // Else redirect user.
   if (recipeIsFound) {
     if (authorization === "authorized") {
       if (recipe.details.title) {
