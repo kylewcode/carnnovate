@@ -81,6 +81,8 @@ async function checkFileDeletion(path) {
   }
 }
 
+const createReadStream = fs.createReadStream;
+
 module.exports = {
   appendToFile,
   clearFile,
@@ -89,4 +91,5 @@ module.exports = {
   openFileHandle,
   deleteTempFile,
   checkFileDeletion,
+  createReadStream,
 };
