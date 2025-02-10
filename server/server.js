@@ -17,7 +17,7 @@ const multer = require("multer");
 const upload = multer({ dest: "uploads/" });
 const cors = require("cors");
 const app = express();
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 3001;
 const mysql = require("mysql");
 const session = require("express-session");
 const MySQLStore = require("express-mysql-session")(session);
@@ -433,86 +433,109 @@ app.post("/api/create", upload.none(), (req, res) => {
     time,
     image: locationId,
   } = req.body;
-  const tempImageQuery = `SELECT s3_object_key, original_filename FROM temp_images
+  const { user_id: userId } = req.session;
+
+  if (locationId !== undefined) {
+    const tempImageQuery = `SELECT s3_object_key, original_filename FROM temp_images
                         WHERE unique_id = ?;`;
-  const tempImageVars = [locationId];
+    const tempImageVars = [locationId];
 
-  pool.query(
-    tempImageQuery,
-    tempImageVars,
-    async (tempImageError, tempImageResults) => {
-      if (tempImageError) throw tempImageError;
+    pool.query(
+      tempImageQuery,
+      tempImageVars,
+      async (tempImageError, tempImageResults) => {
+        if (tempImageError) throw tempImageError;
 
-      try {
-        const {
-          s3_object_key: originalKey,
-          original_filename: originalFileName,
-        } = tempImageResults[0];
+        try {
+          const {
+            s3_object_key: tempImgKey,
+            original_filename: originalFileName,
+          } = tempImageResults[0];
 
-        const bucketName = BUCKET_NAME;
-        const objectResponse = await s3Client.send(
-          new GetObjectCommand({ Bucket: bucketName, Key: originalKey })
-        );
-        const { user_id: userId } = req.session;
-        const key = `user_${userId}_final-image_${originalFileName}_${Date.now()}`;
+          const bucketName = BUCKET_NAME;
+          const finalImgKey = `user_${userId}_final-image_${originalFileName}_${Date.now()}`;
+          const tempImgRes = await s3Client.send(
+            new GetObjectCommand({ Bucket: bucketName, Key: tempImgKey })
+          );
 
-        const upload = new Upload({
-          client: s3Client,
-          params: { Bucket: bucketName, Key: key, Body: objectResponse.Body },
-        });
+          const upload = new Upload({
+            client: s3Client,
+            params: {
+              Bucket: bucketName,
+              Key: finalImgKey,
+              Body: tempImgRes.Body,
+            },
+          });
 
-        await upload.done();
+          await upload.done();
 
-        console.log("File uploaded to S3: ", key);
+          console.log("File uploaded to S3: ", finalImgKey);
 
-        const deleteTempImgQuery = `DELETE from temp_images WHERE unique_id = ?;`;
-        const deleteTempImgVars = [locationId];
+          const deleteTempImgQuery = `DELETE from temp_images WHERE unique_id = ?;`;
+          const deleteTempImgVars = [locationId];
 
-        pool.query(
-          deleteTempImgQuery,
-          deleteTempImgVars,
-          async (deleteTempImgError, deleteTempImgResults) => {
-            if (deleteTempImgError) throw deleteTempImgError;
+          pool.query(
+            deleteTempImgQuery,
+            deleteTempImgVars,
+            async (deleteTempImgError, deleteTempImgResults) => {
+              if (deleteTempImgError) throw deleteTempImgError;
 
-            // (originalKey will match the object_key of the original file in bucket 50%)()
-            console.log(originalKey);
-            // (bucketName will match correct bucket on AWS 50%)();
-            console.log(bucketName);
-            await s3Client.send(
-              new DeleteObjectCommand({ Bucket: bucketName, Key: originalKey })
-            );
+              await s3Client.send(
+                new DeleteObjectCommand({ Bucket: bucketName, Key: tempImgKey })
+              );
 
-            const createQuery = `
-          INSERT INTO recipes (user_id, title, description, ingredients, time, instructions, image)
-          VALUES (?, ?, ?, ?, ?, ?, ?)
-          `;
-            const image = imageCDNurl + key;
-            const createVars = [
-              userId,
-              title,
-              description,
-              ingredients,
-              time,
-              instructions,
-              image,
-            ];
+              const createQuery = `
+                INSERT INTO recipes (user_id, title, description, ingredients, time, instructions, image)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+                `;
+              const image = imageCDNurl + finalImgKey;
+              const createVars = [
+                userId,
+                title,
+                description,
+                ingredients,
+                time,
+                instructions,
+                image,
+              ];
 
-            pool.query(
-              createQuery,
-              createVars,
-              function (createError, createResults) {
-                if (createError) throw createError;
+              pool.query(
+                createQuery,
+                createVars,
+                function (createError, createResults) {
+                  if (createError) throw createError;
 
-                res.status(200).send("Recipe submitted");
-              }
-            );
-          }
-        );
-      } catch (error) {
-        console.log(error);
+                  res.status(200).send("Recipe submitted");
+                }
+              );
+            }
+          );
+        } catch (error) {
+          console.log(error);
+          res.status(500).json({ error: "Internal server error" });
+        }
       }
-    }
-  );
+    );
+  } else {
+    const createQuery = `
+      INSERT INTO recipes (user_id, title, description, ingredients, time, instructions)
+      VALUES (?, ?, ?, ?, ?, ?)
+      `;
+    const createVars = [
+      userId,
+      title,
+      description,
+      ingredients,
+      time,
+      instructions,
+    ];
+
+    pool.query(createQuery, createVars, function (createError, createResults) {
+      if (createError) throw createError;
+
+      res.status(200).send("Recipe submitted");
+    });
+  }
 });
 
 app.post("/api/request-reset", upload.none(), (req, res) => {
@@ -646,84 +669,132 @@ app.post("/api/update-recipe/:recipeId", upload.none(), (req, res) => {
     description,
     time,
     instructions,
-    image: locationID,
+    image: locationId,
     old_image_url: oldImageURL,
   } = req.body;
   const { recipeId } = req.params;
-  const tempImageQuery = `SELECT file_path, current_filename, original_filename FROM temp_images
+
+  if (locationId !== undefined) {
+    const tempImageQuery = `SELECT s3_object_key, original_filename FROM temp_images
                         WHERE unique_id = ?;`;
-  const tempImageVars = [locationID];
+    const tempImageVars = [locationId];
 
-  pool.query(
-    tempImageQuery,
-    tempImageVars,
-    async (tempImageError, tempImageResults) => {
-      if (tempImageError) throw tempImageError;
+    pool.query(
+      tempImageQuery,
+      tempImageVars,
+      async (tempImageError, tempImageResults) => {
+        if (tempImageError) throw tempImageError;
 
-      const { file_path: filePath, current_filename: currentFileName } =
-        tempImageResults[0];
+        try {
+          const {
+            s3_object_key: tempImgKey,
+            original_filename: originalFileName,
+          } = tempImageResults[0];
 
-      const { user_id: userId } = req.session;
-      const bucketName = BUCKET_NAME;
-      const key = `user_${userId}_${currentFileName}_${Date.now()}`;
-      const fileHandle = await openFileHandle(filePath, "r");
-      const readStream = fileHandle.createReadStream();
+          const { user_id: userId } = req.session;
+          const bucketName = BUCKET_NAME;
+          const finalImgKey = `user_${userId}_final-image_${originalFileName}_${Date.now()}`;
+          const tempImgRes = await s3Client.send(
+            new GetObjectCommand({ Bucket: bucketName, Key: tempImgKey })
+          );
 
-      await s3Client.send(
-        new PutObjectCommand({
-          Bucket: bucketName,
-          Key: key,
-          Body: readStream,
-        })
-      );
+          const upload = new Upload({
+            client: s3Client,
+            params: {
+              Bucket: bucketName,
+              Key: finalImgKey,
+              Body: tempImgRes.Body,
+            },
+          });
 
-      console.log("File uploaded to S3: ", key);
+          await upload.done();
 
-      await fileHandle.close();
+          const deleteTempImgQuery = `DELETE from temp_images WHERE unique_id = ?;`;
+          const deleteTempImgVars = [locationId];
 
-      await deleteTempFile(filePath);
-      const { status, message } = await checkFileDeletion(filePath);
-      if (status === "failed" || status === "error") {
-        throw new Error(
-          `There was an issue verifying that the temporary file was deleted at path: ${path} | ${status}: ${message}`
-        );
+          pool.query(
+            deleteTempImgQuery,
+            deleteTempImgVars,
+            async (deleteTempImgError, deleteTempImgResults) => {
+              if (deleteTempImgError) throw deleteTempImgError;
+
+              await s3Client.send(
+                new DeleteObjectCommand({ Bucket: bucketName, Key: tempImgKey })
+              );
+
+              const index = oldImageURL.search(".net/") + 5;
+              const oldImageKey = oldImageURL.slice(index);
+
+              await s3Client.send(
+                new DeleteObjectCommand({
+                  Bucket: bucketName,
+                  Key: oldImageKey,
+                })
+              );
+
+              const updateQuery = `
+              UPDATE recipes
+              SET title = ?,
+              ingredients = ?,
+              description = ?,
+              time = ?,
+              instructions = ?,
+              image = ?
+              WHERE (recipe_id = ?);
+            `;
+              const image = imageCDNurl + finalImgKey;
+              const updateVars = [
+                title,
+                ingredients,
+                description,
+                time,
+                instructions,
+                image,
+                recipeId,
+              ];
+
+              pool.query(
+                updateQuery,
+                updateVars,
+                (updateError, updateResults) => {
+                  if (updateError) throw updateError;
+
+                  res.status(200).send("Recipe updated.");
+                }
+              );
+            }
+          );
+        } catch (error) {
+          console.log(error);
+          res.status(500).json({ error: "Internal server error" });
+        }
       }
+    );
+  } else {
+    const updateQuery = `
+        UPDATE recipes
+        SET title = ?,
+        ingredients = ?,
+        description = ?,
+        time = ?,
+        instructions = ?
+        WHERE (recipe_id = ?);
+        `;
+    const updateVars = [
+      title,
+      ingredients,
+      description,
+      time,
+      instructions,
+      recipeId,
+    ];
 
-      const index = oldImageURL.search(".net/") + 5;
-      const oldKey = oldImageURL.slice(index);
+    pool.query(updateQuery, updateVars, (updateError, updateResults) => {
+      if (updateError) throw updateError;
 
-      await s3Client.send(
-        new DeleteObjectCommand({ Bucket: bucketName, Key: oldKey })
-      );
-
-      const updateQuery = `
-            UPDATE recipes
-            SET title = ?,
-            ingredients = ?,
-            description = ?,
-            time = ?,
-            instructions = ?,
-            image = ?
-            WHERE (recipe_id = ?);
-          `;
-      const image = imageCDNurl + key;
-      const updateVars = [
-        title,
-        ingredients,
-        description,
-        time,
-        instructions,
-        image,
-        recipeId,
-      ];
-
-      pool.query(updateQuery, updateVars, (updateError, updateResults) => {
-        if (updateError) throw updateError;
-
-        res.status(200).send("Recipe updated.");
-      });
-    }
-  );
+      res.status(200).send("Recipe updated.");
+    });
+  }
 });
 
 app.post("/api/add-comment/:recipeId", upload.none(), (req, res) => {
