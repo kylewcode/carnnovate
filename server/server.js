@@ -1,13 +1,6 @@
 require("dotenv").config();
 const path = require("path");
-const {
-  appendToFile,
-  clearFile,
-  openFileHandle,
-  deleteTempFile,
-  checkFileDeletion,
-  createReadStream,
-} = require("./utils/fs");
+const { appendToFile, clearFile, openFileHandle } = require("./utils/fs");
 const crypto = require("crypto");
 const createUUID = crypto.randomUUID;
 const { HOST, APP_USER, DB_PASSWORD, DB, LONG_RANDOM_STRING, BUCKET_NAME } =
@@ -15,33 +8,12 @@ const { HOST, APP_USER, DB_PASSWORD, DB, LONG_RANDOM_STRING, BUCKET_NAME } =
 const express = require("express");
 const multer = require("multer");
 const upload = multer({ dest: "uploads/" });
-const cors = require("cors");
 const app = express();
 const port = process.env.PORT || 3001;
-const mysql = require("mysql");
+
 const session = require("express-session");
+const mysql = require("mysql");
 const MySQLStore = require("express-mysql-session")(session);
-
-const {
-  S3Client,
-  PutObjectCommand,
-  DeleteObjectCommand,
-  GetObjectCommand,
-} = require("@aws-sdk/client-s3");
-const s3Client = new S3Client({});
-const { Upload } = require("@aws-sdk/lib-storage");
-
-const isProduction = app.get("env") === "production";
-console.log("Environment is production: ", isProduction);
-isProduction ? app.set("trust proxy", 1) : null;
-// Production preview
-// const domain = "http://localhost:4173";
-// Deployment and development
-const domain = isProduction
-  ? "https://carnnovate-4fb4882151ae.herokuapp.com"
-  : "http://localhost:5173";
-const imageCDNurl = "https://d3db7jqhdyx8x1.cloudfront.net/";
-
 const poolOptions = {
   connectionLimit: 10,
   host: HOST,
@@ -65,15 +37,37 @@ sessionStore
   .then(() => console.log("MySQLStore ready"))
   .catch((error) => console.error(error));
 
+const {
+  S3Client,
+  PutObjectCommand,
+  DeleteObjectCommand,
+  GetObjectCommand,
+} = require("@aws-sdk/client-s3");
+const s3Client = new S3Client({});
+const { Upload } = require("@aws-sdk/lib-storage");
+
+const isProduction = app.get("env") === "production";
+console.log("Environment is production: ", isProduction);
+isProduction ? app.set("trust proxy", 1) : null;
+// Production preview
+// const domain = "http://localhost:4173";
+// Deployment and development
+const domain = isProduction
+  ? "https://carnnovate-4fb4882151ae.herokuapp.com"
+  : "http://localhost:5173";
+
+const imageCDNurl = "https://d3db7jqhdyx8x1.cloudfront.net/";
+
 const bcrypt = require("bcrypt");
-const { type } = require("os");
 const saltRounds = 10;
 
+const cors = require("cors");
 const corsOptions = {
   origin: domain,
   optionsSuccessStatus: 200,
   credentials: true,
 };
+
 app.use(cors(corsOptions));
 
 app.use(
@@ -862,20 +856,31 @@ app.delete("/api/delete-recipe/:recipeId", (req, res) => {
     if (error) throw error;
 
     const { image } = results[0];
-    const index = image.search(".net/") + 5;
-    const oldKey = image.slice(index);
 
-    await s3Client.send(
-      new DeleteObjectCommand({ Bucket: bucketName, Key: oldKey })
-    );
+    if (image !== null) {
+      const index = image.search(".net/") + 5;
+      const oldKey = image.slice(index);
 
-    const query = `DELETE FROM recipes WHERE recipe_id = ?`;
+      await s3Client.send(
+        new DeleteObjectCommand({ Bucket: bucketName, Key: oldKey })
+      );
 
-    pool.query(query, recipeId, (error, results) => {
-      if (error) throw error;
+      const query = `DELETE FROM recipes WHERE recipe_id = ?`;
 
-      res.status(200).send({ message: `Recipe of id ${recipeId} deleted.` });
-    });
+      pool.query(query, recipeId, (error, results) => {
+        if (error) throw error;
+
+        res.status(200).send({ message: `Recipe of id ${recipeId} deleted.` });
+      });
+    } else {
+      const query = `DELETE FROM recipes WHERE recipe_id = ?`;
+
+      pool.query(query, recipeId, (error, results) => {
+        if (error) throw error;
+
+        res.status(200).send({ message: `Recipe of id ${recipeId} deleted.` });
+      });
+    }
   });
 });
 
