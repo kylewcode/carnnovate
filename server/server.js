@@ -6,12 +6,12 @@ const createUUID = crypto.randomUUID;
 const { HOST, APP_USER, DB_PASSWORD, DB, LONG_RANDOM_STRING, BUCKET_NAME } =
   process.env;
 const express = require("express");
+const session = require("express-session");
 const multer = require("multer");
 const upload = multer({ dest: "uploads/" });
 const app = express();
 const port = process.env.PORT || 3001;
 
-const session = require("express-session");
 const mysql = require("mysql2/promise");
 const MySQLStore = require("express-mysql-session")(session);
 const poolOptions = {
