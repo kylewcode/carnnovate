@@ -12,7 +12,7 @@ const app = express();
 const port = process.env.PORT || 3001;
 
 const session = require("express-session");
-const mysql = require("mysql");
+const mysql = require("mysql2/promise");
 const MySQLStore = require("express-mysql-session")(session);
 const poolOptions = {
   connectionLimit: 10,
