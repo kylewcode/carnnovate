@@ -1,8 +1,6 @@
-const fs = require("fs");
-const { promises } = fs;
-const os = require("os");
-const { tmpdir } = os;
-const path = require("path");
+import { promises, createReadStream } from "fs";
+import { tmpdir } from "os";
+import path from "path";
 
 async function appendToFile(filename, text) {
   try {
@@ -81,9 +79,7 @@ async function checkFileDeletion(path) {
   }
 }
 
-const createReadStream = fs.createReadStream;
-
-module.exports = {
+export {
   appendToFile,
   clearFile,
   createTempDir,
