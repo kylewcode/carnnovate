@@ -1,6 +1,12 @@
 import "dotenv/config";
 import path from "path";
-import { appendToFile, clearFile, openFileHandle } from "./utils/fs.js";
+import {
+  appendToFile,
+  checkFileDeletion,
+  clearFile,
+  deleteTempFile,
+  openFileHandle,
+} from "./utils/fs.js";
 import crypto from "crypto";
 const createUUID = crypto.randomUUID;
 const { HOST, APP_USER, DB_PASSWORD, DB, LONG_RANDOM_STRING, BUCKET_NAME } =
@@ -887,6 +893,11 @@ app.post("/api/upload-images", upload.single("image"), async (req, res) => {
     console.log("File uploaded to S3: ", key);
 
     await fileHandle.close();
+
+    await deleteTempFile(path);
+
+    const { status, message } = await checkFileDeletion(path);
+    console.log(`${status} : ${message}`);
 
     const uniqueID = createUUID();
     const uploadImageQuery = `
