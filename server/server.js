@@ -967,6 +967,37 @@ app.delete("/api/delete-recipe/:recipeId", async (req, res) => {
   }
 });
 
+app.delete("/api/upload-images", express.text(), async (req, res) => {
+  try {
+    const fetchTempImageQuery = `
+      SELECT s3_object_key FROM temp_images
+      WHERE unique_id = ?;
+      `;
+    const [fetchTempImageQueryResults] = await pool.execute(
+      fetchTempImageQuery,
+      [req.body]
+    );
+    const { s3_object_key: objectKey } = fetchTempImageQueryResults[0];
+
+    await s3Client.send(
+      new DeleteObjectCommand({ Bucket: BUCKET_NAME, Key: objectKey })
+    );
+
+    const deleteTempImageQuery = `
+      DELETE FROM temp_images
+      WHERE unique_id = ?;
+      `;
+
+    await pool.execute(deleteTempImageQuery, [req.body]);
+
+    res.status(200).send({ message: "Uploaded image deleted." });
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({ error: "Internal server error." });
+  }
+});
+
 if (isProduction) {
   app.use(express.static(path.join(__dirname, "../client/dist")));
 
