@@ -1,5 +1,11 @@
 import { useState } from "react";
-import { Form, Navigate, redirect, useOutletContext } from "react-router-dom";
+import {
+  Form,
+  Navigate,
+  redirect,
+  useOutletContext,
+  useNavigation,
+} from "react-router-dom";
 
 import { apiConfig } from "../../config";
 
@@ -20,6 +26,13 @@ export async function action({ request }) {
 export default function Create({ FilePond }) {
   const [authorization] = useOutletContext();
   const [files, setFiles] = useState([]);
+  const navigation = useNavigation();
+  const submitText =
+    navigation.state === "submitting"
+      ? "Submitting"
+      : navigation.state === "loading"
+      ? "Submitted"
+      : "Submit";
 
   if (authorization === "authorized") {
     return (
@@ -80,8 +93,12 @@ export default function Create({ FilePond }) {
         <label htmlFor="time">Time (in minutes)</label>
         <input type="number" name="time" id="time" />
 
-        <button type="submit" className="content-button">
-          Submit
+        <button
+          type="submit"
+          className="content-button"
+          disabled={navigation.state !== "idle"}
+        >
+          {submitText}
         </button>
       </Form>
     );
