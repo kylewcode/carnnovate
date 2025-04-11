@@ -5,6 +5,7 @@ import {
   Navigate,
   useNavigate,
   useOutletContext,
+  useNavigation,
 } from "react-router-dom";
 
 import { apiConfig } from "../../config";
@@ -30,6 +31,13 @@ export default function EditRecipe({ FilePond }) {
   const [authorization, setAuthorization] = useOutletContext();
   const [recipeDetails, setRecipeDetails] = useState({});
   const [files, setFiles] = useState([]);
+  const navigation = useNavigation();
+  const submitText =
+    navigation.state === "submitting"
+      ? "Updating"
+      : navigation.state === "loading"
+      ? "Updated"
+      : "Update recipe";
 
   useEffect(() => {
     const getRecipeDetails = async () => {
@@ -129,8 +137,12 @@ export default function EditRecipe({ FilePond }) {
             defaultValue={recipeDetails.time}
           />
 
-          <button type="submit" className="content-button">
-            Update recipe
+          <button
+            type="submit"
+            className="content-button"
+            disabled={navigation.state !== "idle"}
+          >
+            {submitText}
           </button>
           <button
             type="button"
