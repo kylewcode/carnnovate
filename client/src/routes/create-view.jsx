@@ -44,7 +44,6 @@ export default function Create({ FilePond }) {
         <label htmlFor="title">Title</label>
         <input type="text" name="title" id="title" />
 
-        <label htmlFor="image">Upload image</label>
         <FilePond
           files={files}
           onupdatefiles={setFiles}

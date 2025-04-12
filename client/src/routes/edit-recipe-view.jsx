@@ -83,7 +83,7 @@ export default function EditRecipe({ FilePond }) {
             name="old_image_url"
             value={recipeDetails.image || undefined}
           />
-          <label htmlFor="image">Upload new image</label>
+
           <FilePond
             files={files}
             onupdatefiles={setFiles}
