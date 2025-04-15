@@ -11,6 +11,8 @@ import {
 import { apiConfig } from "../../config";
 import { deleteRecipe, getRecipe } from "../utils/ajax";
 
+import placeholderImg from "../img/dummy-meal-image-600x400.png";
+
 export async function action({ params, request }) {
   const formData = await request.formData();
 
@@ -74,10 +76,17 @@ export default function EditRecipe({ FilePond }) {
             name="title"
             id="title"
             defaultValue={recipeDetails.title}
+            minLength={3}
+            maxLength={75}
+            pattern="^[a-zA-Z0-9' \-]+$"
+            required
           />
 
           <p>Current image</p>
-          <img src={recipeDetails.image} alt={recipeDetails.title} />
+          <img
+            src={recipeDetails.image ? recipeDetails.image : placeholderImg}
+            alt={recipeDetails.title}
+          />
           <input
             type="hidden"
             name="old_image_url"
@@ -109,6 +118,10 @@ export default function EditRecipe({ FilePond }) {
             cols="30"
             rows="10"
             defaultValue={recipeDetails.description}
+            minLength={10}
+            maxLength={1000}
+            pattern="^[a-zA-Z0-9' \-]+$"
+            required
           ></textarea>
 
           <label htmlFor="ingredients">Ingredients</label>
@@ -118,6 +131,9 @@ export default function EditRecipe({ FilePond }) {
             cols="30"
             rows="10"
             defaultValue={recipeDetails.ingredients}
+            required
+            minLength={5}
+            maxLength={1000}
           ></textarea>
 
           <label htmlFor="instructions">Instructions</label>
@@ -127,6 +143,9 @@ export default function EditRecipe({ FilePond }) {
             cols="30"
             rows="10"
             defaultValue={recipeDetails.instructions}
+            required
+            minLength={10}
+            maxLength={5000}
           ></textarea>
 
           <label htmlFor="time">Time (in minutes)</label>
@@ -135,6 +154,9 @@ export default function EditRecipe({ FilePond }) {
             name="time"
             id="time"
             defaultValue={recipeDetails.time}
+            required
+            min={1}
+            max={300}
           />
 
           <button

@@ -42,7 +42,15 @@ export default function Create({ FilePond }) {
         className="createpage-layout"
       >
         <label htmlFor="title">Title</label>
-        <input type="text" name="title" id="title" />
+        <input
+          type="text"
+          name="title"
+          id="title"
+          minLength={3}
+          maxLength={75}
+          pattern="^[a-zA-Z0-9' \-]+$"
+          required
+        />
 
         <FilePond
           files={files}
@@ -69,6 +77,10 @@ export default function Create({ FilePond }) {
           cols="30"
           rows="10"
           placeholder="Enter a description..."
+          minLength={10}
+          maxLength={1000}
+          pattern="^[a-zA-Z0-9' \-]+$"
+          required
         ></textarea>
 
         <label htmlFor="ingredients">Ingredients</label>
@@ -78,6 +90,9 @@ export default function Create({ FilePond }) {
           cols="30"
           rows="10"
           placeholder="Enter ingredients with a new line for each ingredient."
+          required
+          minLength={5}
+          maxLength={1000}
         ></textarea>
 
         <label htmlFor="instructions">Instructions</label>
@@ -87,10 +102,13 @@ export default function Create({ FilePond }) {
           cols="30"
           rows="10"
           placeholder="Enter instructions..."
+          required
+          minLength={10}
+          maxLength={5000}
         ></textarea>
 
         <label htmlFor="time">Time (in minutes)</label>
-        <input type="number" name="time" id="time" />
+        <input type="number" name="time" id="time" required min={1} max={300} />
 
         <button
           type="submit"

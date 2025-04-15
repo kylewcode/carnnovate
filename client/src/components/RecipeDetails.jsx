@@ -1,9 +1,11 @@
+import placeholderImg from "../img/dummy-meal-image-600x400.png";
+
 function RecipeDetails({ recipe }) {
   return (
     <div className="recipe-details-layout">
       <h1>{recipe.details.title}</h1>
       <img
-        src={recipe.details.image}
+        src={recipe.details.image ? recipe.details.image : placeholderImg}
         alt={`Image of ${recipe.details.title}`}
       />
       <div className="separator"></div>
