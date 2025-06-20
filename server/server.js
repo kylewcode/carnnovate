@@ -17,6 +17,8 @@ const {
   LONG_RANDOM_STRING,
   BUCKET_NAME,
   IMAGE_CDN_URL,
+  PROD_DOMAIN,
+  DEV_DOMAIN,
 } = process.env;
 import express from "express";
 import session from "express-session";
@@ -70,9 +72,7 @@ isProduction ? app.set("trust proxy", 1) : null;
 // Production preview
 // const domain = "http://localhost:4173";
 // Deployment and development
-const domain = isProduction
-  ? "https://carnnovate-4fb4882151ae.herokuapp.com"
-  : "http://localhost:5173";
+const domain = isProduction ? PROD_DOMAIN : DEV_DOMAIN;
 
 import bcrypt from "bcrypt";
 const saltRounds = 10;
