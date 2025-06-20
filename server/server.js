@@ -72,7 +72,7 @@ isProduction ? app.set("trust proxy", 1) : null;
 // Production preview
 // const domain = "http://localhost:4173";
 // Deployment and development
-const domain = isProduction ? PROD_DOMAIN : DEV_DOMAIN;
+const domain = isProduction ? PROD_DOMAIN : DEV_DOMAIN; // Added config vars for dev, staging, and production
 
 import bcrypt from "bcrypt";
 const saltRounds = 10;
