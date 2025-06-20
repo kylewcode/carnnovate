@@ -91,7 +91,8 @@ const corsOptions = {
   optionsSuccessStatus: 200,
   credentials: true,
 };
-console.log("corsOptions.origin", corsOptions.domain);
+console.log("corsOptions.origin", corsOptions.origin);
+console.log("--- CORS DEBUG END ---");
 
 app.use(cors(corsOptions));
 
