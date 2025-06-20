@@ -9,8 +9,15 @@ import {
 } from "./utils/fs.js";
 import crypto from "crypto";
 const createUUID = crypto.randomUUID;
-const { HOST, APP_USER, DB_PASSWORD, DB, LONG_RANDOM_STRING, BUCKET_NAME } =
-  process.env;
+const {
+  HOST,
+  APP_USER,
+  DB_PASSWORD,
+  DB,
+  LONG_RANDOM_STRING,
+  BUCKET_NAME,
+  IMAGE_CDN_URL,
+} = process.env;
 import express from "express";
 import session from "express-session";
 import multer from "multer";
@@ -42,7 +49,9 @@ const sessionStore = new MySQLStore(storeOptions, pool);
 sessionStore
   .onReady()
   .then(() => console.log("Session store ready."))
-  .catch((error) => console.error(error));
+  .catch((error) =>
+    console.error("Session store failed to initialize: ", error)
+  );
 
 import {
   S3Client,
@@ -64,8 +73,6 @@ isProduction ? app.set("trust proxy", 1) : null;
 const domain = isProduction
   ? "https://carnnovate-4fb4882151ae.herokuapp.com"
   : "http://localhost:5173";
-
-const imageCDNurl = "https://d3db7jqhdyx8x1.cloudfront.net/";
 
 import bcrypt from "bcrypt";
 const saltRounds = 10;
@@ -541,7 +548,7 @@ app.post("/api/create", upload.none(), async (req, res) => {
         INSERT INTO recipes (user_id, title, description, ingredients, time, instructions, image)
         VALUES (?, ?, ?, ?, ?, ?, ?)
         `;
-      const image = imageCDNurl + finalImgKey;
+      const image = IMAGE_CDN_URL + finalImgKey;
       const createVars = [
         userId,
         title,
@@ -809,7 +816,7 @@ app.post("/api/update-recipe/:recipeId", upload.none(), async (req, res) => {
                   image = ?
                   WHERE (recipe_id = ?);
                   `;
-      const image = imageCDNurl + finalImgKey;
+      const image = IMAGE_CDN_URL + finalImgKey;
       const updateRecipeVars = [
         title,
         ingredients,
