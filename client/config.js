@@ -1,8 +1,5 @@
-const isProduction = import.meta.env.PROD;
-console.log("Environment is production: ", isProduction);
+const { VITE_PROD_API, VITE_DEV_API } = import.meta.env;
 
 export const apiConfig = {
-  endpoint: isProduction
-    ? "https://carnnovate-4fb4882151ae.herokuapp.com/api"
-    : "http://localhost:3001/api",
+  endpoint: VITE_PROD_API ? VITE_PROD_API : VITE_DEV_API,
 };
