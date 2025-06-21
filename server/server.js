@@ -25,8 +25,7 @@ const {
   PROD_DOMAIN,
   DEV_DOMAIN,
 } = process.env;
-console.log("--- CORS DEBUG START ---");
-console.log("process.env.PROD_DOMAIN:", process.env.PROD_DOMAIN);
+
 import express from "express";
 import session from "express-session";
 import multer from "multer";
@@ -80,7 +79,6 @@ isProduction ? app.set("trust proxy", 1) : null;
 // const domain = "http://localhost:4173";
 // Deployment and development
 const domain = isProduction ? PROD_DOMAIN : DEV_DOMAIN; // Added config vars for dev, staging, and production
-console.log("domain:", domain);
 
 import bcrypt from "bcrypt";
 const saltRounds = 10;
@@ -91,8 +89,6 @@ const corsOptions = {
   optionsSuccessStatus: 200,
   credentials: true,
 };
-console.log("corsOptions.origin", corsOptions.origin);
-console.log("--- CORS DEBUG END ---");
 
 app.use(cors(corsOptions));
 
