@@ -12,6 +12,7 @@ import {
   deleteTempFile,
   openFileHandle,
 } from "./utils/fs.js";
+import processImage from "./utils/imageProcessor.js";
 import crypto from "crypto";
 const createUUID = crypto.randomUUID;
 const {
@@ -511,39 +512,55 @@ app.post("/api/create", upload.none(), async (req, res) => {
     // If user has uploaded an image
     if (locationId !== undefined) {
       const tempImageQuery = `
-        SELECT s3_object_key, original_filename FROM temp_images
-        WHERE unique_id = ?;
-        `;
+      SELECT s3_object_key, original_filename FROM temp_images
+      WHERE unique_id = ?;
+      `;
       const tempImageVars = [locationId];
       const [tempImageQueryResults] = await pool.execute(
         tempImageQuery,
         tempImageVars
       );
+
       const { s3_object_key: tempImgKey, original_filename: originalFileName } =
         tempImageQueryResults[0];
-      const finalImgKey = `user_${userId}_final-image_${originalFileName}_${Date.now()}`;
+
       const tempImgRes = await s3Client.send(
         new GetObjectCommand({ Bucket: BUCKET_NAME, Key: tempImgKey })
       );
-      const upload = new Upload({
+      const tempImgBuffer = await tempImgRes.Body.transformToByteArray();
+
+      const processedImagesBufferList = await processImage(tempImgBuffer); // [original, thumbnail]
+
+      const finalImgKey = `user_${userId}_final-image_${originalFileName}_${Date.now()}`;
+      const uploadOriginal = new Upload({
         client: s3Client,
         params: {
           Bucket: BUCKET_NAME,
           Key: finalImgKey,
-          Body: tempImgRes.Body,
+          Body: processedImagesBufferList[0],
         },
       });
 
-      await upload.done();
+      const thumbnailKey = `user_${userId}_thumbnail-image_${originalFileName}_${Date.now()}`;
+      const uploadThumbnail = new Upload({
+        client: s3Client,
+        params: {
+          Bucket: BUCKET_NAME,
+          Key: thumbnailKey,
+          Body: processedImagesBufferList[1],
+        },
+      });
 
-      console.log("File uploaded to S3: ", finalImgKey);
+      await uploadOriginal.done();
+      await uploadThumbnail.done();
+
+      console.log("Files uploaded to S3: ", finalImgKey, " & ", thumbnailKey);
 
       const deleteTempImgQuery = `
         DELETE from temp_images 
         WHERE unique_id = ?;
         `;
       const deleteTempImgVars = [locationId];
-
       await pool.execute(deleteTempImgQuery, deleteTempImgVars);
 
       await s3Client.send(
@@ -551,10 +568,11 @@ app.post("/api/create", upload.none(), async (req, res) => {
       );
 
       const createQuery = `
-        INSERT INTO recipes (user_id, title, description, ingredients, time, instructions, image)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO recipes (user_id, title, description, ingredients, time, instructions, image, thumbnail)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         `;
-      const image = IMAGE_CDN_URL + finalImgKey;
+      const fullImage = IMAGE_CDN_URL + finalImgKey;
+      const thumbnailImage = IMAGE_CDN_URL + thumbnailKey;
       const createVars = [
         userId,
         title,
@@ -562,13 +580,15 @@ app.post("/api/create", upload.none(), async (req, res) => {
         ingredients,
         time,
         instructions,
-        image,
+        fullImage,
+        thumbnailImage,
       ];
 
       await pool.execute(createQuery, createVars);
 
       res.status(200).send("Recipe submitted");
     } else {
+      // If user did NOT upload image
       const createQuery = `
         INSERT INTO recipes (user_id, title, description, ingredients, time, instructions)
         VALUES (?, ?, ?, ?, ?, ?)
@@ -757,15 +777,16 @@ app.post("/api/update-recipe/:recipeId", upload.none(), async (req, res) => {
       instructions,
       image: locationId,
       old_image_url: oldImageURL,
+      old_thumbnail_url: oldThumbURL,
     } = req.body;
     const { recipeId } = req.params;
 
-    // If user uploaded new image
+    // If user uploaded new image.
     if (locationId !== undefined) {
       const tempImageQuery = `
-        SELECT s3_object_key, original_filename FROM temp_images
-        WHERE unique_id = ?
-        `;
+      SELECT s3_object_key, original_filename FROM temp_images
+      WHERE unique_id = ?
+      `;
       const tempImageVars = [locationId];
       const [tempImageQueryResults] = await pool.execute(
         tempImageQuery,
@@ -773,44 +794,71 @@ app.post("/api/update-recipe/:recipeId", upload.none(), async (req, res) => {
       );
       const { s3_object_key: tempImgKey, original_filename: originalFileName } =
         tempImageQueryResults[0];
-      const { user_id: userId } = req.session;
-      const finalImgKey = `user_${userId}_final-image_${originalFileName}_${Date.now()}`;
+
       const tempImgRes = await s3Client.send(
         new GetObjectCommand({ Bucket: BUCKET_NAME, Key: tempImgKey })
       );
+      const tempImgBuffer = await tempImgRes.Body.transformToByteArray();
 
-      const upload = new Upload({
+      const processedImagesBufferList = await processImage(tempImgBuffer); // [original, thumbnail]
+
+      const { user_id: userId } = req.session;
+      const finalImgKey = `user_${userId}_final-image_${originalFileName}_${Date.now()}`;
+      const uploadOriginal = new Upload({
         client: s3Client,
         params: {
           Bucket: BUCKET_NAME,
           Key: finalImgKey,
-          Body: tempImgRes.Body,
+          Body: processedImagesBufferList[0],
         },
       });
 
-      await upload.done();
+      const thumbnailKey = `user_${userId}_thumbnail-image_${originalFileName}_${Date.now()}`;
+      const uploadThumbnail = new Upload({
+        client: s3Client,
+        params: {
+          Bucket: BUCKET_NAME,
+          Key: thumbnailKey,
+          Body: processedImagesBufferList[1],
+        },
+      });
+
+      await uploadOriginal.done();
+      await uploadThumbnail.done();
+
+      console.log("Files uploaded to S3: ", finalImgKey, " & ", thumbnailKey);
 
       const deleteTempImgQuery = `
               DELETE from temp_images 
               WHERE unique_id = ?
               `;
       const deleteTempImgVars = [locationId];
-
       await pool.execute(deleteTempImgQuery, deleteTempImgVars);
 
       await s3Client.send(
         new DeleteObjectCommand({ Bucket: BUCKET_NAME, Key: tempImgKey })
       );
 
-      const index = oldImageURL.search(".net/") + 5;
-      const oldImageKey = oldImageURL.slice(index);
+      if (oldImageURL !== "") {
+        let index = oldImageURL.search(".net/") + 5;
+        const oldImageKey = oldImageURL.slice(index);
+        index = oldThumbURL.search(".net/") + 5;
+        const oldThumbKey = oldThumbURL.slice(index);
 
-      await s3Client.send(
-        new DeleteObjectCommand({
-          Bucket: BUCKET_NAME,
-          Key: oldImageKey,
-        })
-      );
+        await s3Client.send(
+          new DeleteObjectCommand({
+            Bucket: BUCKET_NAME,
+            Key: oldImageKey,
+          })
+        );
+
+        await s3Client.send(
+          new DeleteObjectCommand({
+            Bucket: BUCKET_NAME,
+            Key: oldThumbKey,
+          })
+        );
+      }
 
       const updateRecipeQuery = `
                   UPDATE recipes
@@ -819,17 +867,20 @@ app.post("/api/update-recipe/:recipeId", upload.none(), async (req, res) => {
                   description = ?,
                   time = ?,
                   instructions = ?,
-                  image = ?
+                  image = ?,
+                  thumbnail = ?
                   WHERE (recipe_id = ?);
                   `;
-      const image = IMAGE_CDN_URL + finalImgKey;
+      const fullImage = IMAGE_CDN_URL + finalImgKey;
+      const thumbnailImage = IMAGE_CDN_URL + thumbnailKey;
       const updateRecipeVars = [
         title,
         ingredients,
         description,
         time,
         instructions,
-        image,
+        fullImage,
+        thumbnailImage,
         recipeId,
       ];
 
@@ -907,7 +958,7 @@ app.post("/api/upload-images", upload.single("image"), async (req, res) => {
 
     await fileHandle.close();
 
-    await deleteTempFile(path);
+    await deleteTempFile(path); // Is this necessary? If the file is being temporarily storerd in S3, why would this be needed?
 
     const { status, message } = await checkFileDeletion(path);
     console.log(`${status} : ${message}`);
@@ -933,24 +984,33 @@ app.post("/api/upload-images", upload.single("image"), async (req, res) => {
 app.delete("/api/delete-recipe/:recipeId", async (req, res) => {
   try {
     const recipeId = req.params.recipeId;
+    // Get thumbnail and full-size image urls
     const imageURLquery = `
-    SELECT image FROM recipes 
-    WHERE recipe_id = ?
+      SELECT image, thumbnail FROM recipes 
+      WHERE recipe_id = ?
     `;
     const imageURLvars = [recipeId];
     const [imageURLqueryResults] = await pool.execute(
       imageURLquery,
       imageURLvars
     );
-    const { image } = imageURLqueryResults[0];
+    const { image, thumbnail } = imageURLqueryResults[0];
 
-    // Delete image from AWS S3 bucket if there is one.
+    // Delete full size and thumbnail images from AWS S3 bucket if there is one.
     if (image !== null) {
-      const index = image.search(".net/") + 5;
-      const oldKey = image.slice(index);
+      // Extract keys from urls
+      let i = image.search(".net/") + 5;
+      const oldOriginalKey = image.slice(i);
+      i = thumbnail.search(".net/") + 5;
+      const oldThumbnailKey = thumbnail.slice(i);
+
+      // Delete images from bucket
+      await s3Client.send(
+        new DeleteObjectCommand({ Bucket: BUCKET_NAME, Key: oldOriginalKey })
+      );
 
       await s3Client.send(
-        new DeleteObjectCommand({ Bucket: BUCKET_NAME, Key: oldKey })
+        new DeleteObjectCommand({ Bucket: BUCKET_NAME, Key: oldThumbnailKey })
       );
 
       const deleteRecipeQuery = `

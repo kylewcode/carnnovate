@@ -90,7 +90,12 @@ export default function EditRecipe({ FilePond }) {
           <input
             type="hidden"
             name="old_image_url"
-            value={recipeDetails.image || undefined}
+            value={recipeDetails.image || ""}
+          />
+          <input
+            type="hidden"
+            name="old_thumbnail_url"
+            value={recipeDetails.thumbnail || ""}
           />
 
           <FilePond

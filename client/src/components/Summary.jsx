@@ -6,7 +6,11 @@ function Summary({ recipe }) {
   return (
     <li className="card">
       <div className="thumbnail">
-        <img src={dummyThumbnail} width="75px" alt="Recipe thumbnail" />
+        <img
+          src={recipe.thumbnail ? recipe.thumbnail : dummyThumbnail}
+          width={recipe.thumbnail ? "200px" : "75px"}
+          alt="Recipe thumbnail"
+        />
       </div>
       <Link to={`detail/${recipe.recipe_id}`}>
         <h2>{recipe.title}</h2>
