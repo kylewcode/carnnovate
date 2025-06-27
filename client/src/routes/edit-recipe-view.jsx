@@ -33,13 +33,16 @@ export default function EditRecipe({ FilePond }) {
   const [authorization, setAuthorization] = useOutletContext();
   const [recipeDetails, setRecipeDetails] = useState({});
   const [files, setFiles] = useState([]);
+  const [imageUploadStatus, setImageUploadStatus] = useState("idle");
   const navigation = useNavigation();
   const submitText =
     navigation.state === "submitting"
-      ? "Updating"
+      ? "Updating..."
       : navigation.state === "loading"
       ? "Updated"
-      : "Update recipe";
+      : imageUploadStatus === "uploading"
+      ? "Uploading..."
+      : "Update";
 
   useEffect(() => {
     const getRecipeDetails = async () => {
@@ -101,6 +104,8 @@ export default function EditRecipe({ FilePond }) {
           <FilePond
             files={files}
             onupdatefiles={setFiles}
+            onaddfilestart={() => setImageUploadStatus("uploading")}
+            onprocessfiles={() => setImageUploadStatus("idle")}
             allowMultiple={false}
             allowFileTypeValidation={true}
             labelFileTypeNotAllowed="File type is invalid. Please please upload jpeg, png, or gif file types only."
@@ -167,7 +172,9 @@ export default function EditRecipe({ FilePond }) {
           <button
             type="submit"
             className="content-button"
-            disabled={navigation.state !== "idle"}
+            disabled={
+              navigation.state !== "idle" || imageUploadStatus === "uploading"
+            }
           >
             {submitText}
           </button>
@@ -176,7 +183,7 @@ export default function EditRecipe({ FilePond }) {
             className="content-button"
             onClick={handleClick}
           >
-            Delete recipe
+            Delete
           </button>
         </Form>
       </div>

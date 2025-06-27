@@ -26,12 +26,15 @@ export async function action({ request }) {
 export default function Create({ FilePond }) {
   const [authorization] = useOutletContext();
   const [files, setFiles] = useState([]);
+  const [imageUploadStatus, setImageUploadStatus] = useState("idle");
   const navigation = useNavigation();
   const submitText =
     navigation.state === "submitting"
-      ? "Submitting"
+      ? "Submitting..."
       : navigation.state === "loading"
       ? "Submitted"
+      : imageUploadStatus === "uploading"
+      ? "Uploading..."
       : "Submit";
 
   if (authorization === "authorized") {
@@ -55,6 +58,8 @@ export default function Create({ FilePond }) {
         <FilePond
           files={files}
           onupdatefiles={setFiles}
+          onaddfilestart={() => setImageUploadStatus("uploading")}
+          onprocessfiles={() => setImageUploadStatus("idle")}
           allowMultiple={false}
           allowFileTypeValidation={true}
           labelFileTypeNotAllowed="File type is invalid. Please please upload jpeg, png, or gif file types only."
@@ -113,7 +118,9 @@ export default function Create({ FilePond }) {
         <button
           type="submit"
           className="content-button"
-          disabled={navigation.state !== "idle"}
+          disabled={
+            navigation.state !== "idle" || imageUploadStatus === "uploading"
+          }
         >
           {submitText}
         </button>
