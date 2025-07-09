@@ -34,6 +34,7 @@ export default function EditRecipe({ FilePond }) {
   const [recipeDetails, setRecipeDetails] = useState({});
   const [files, setFiles] = useState([]);
   const [imageUploadStatus, setImageUploadStatus] = useState("idle");
+  const [uploadError, setUploadError] = useState("");
   const navigation = useNavigation();
   const submitText =
     navigation.state === "submitting"
@@ -73,7 +74,12 @@ export default function EditRecipe({ FilePond }) {
       <div className="editpage-layout">
         <h2>Edit Recipe</h2>
         <Form method="post" encType="multipart/form-data">
-          <label htmlFor="title">Title</label>
+          <label htmlFor="title">
+            Title
+            <span style={{ color: "red" }}>
+              Angle brackets &lt; &gt; are not allowed.
+            </span>
+          </label>
           <input
             type="text"
             name="title"
@@ -81,8 +87,9 @@ export default function EditRecipe({ FilePond }) {
             defaultValue={recipeDetails.title}
             minLength={3}
             maxLength={75}
-            pattern="^[a-zA-Z0-9' \-]+$"
+            pattern="^[a-zA-Z0-9 .,!?:;\(\)\-]+$"
             required
+            autoFocus
           />
 
           <p>Current image</p>
@@ -101,11 +108,20 @@ export default function EditRecipe({ FilePond }) {
             value={recipeDetails.thumbnail || ""}
           />
 
+          {uploadError !== "" ? <p>Upload failed: {uploadError}</p> : null}
           <FilePond
             files={files}
             onupdatefiles={setFiles}
-            onaddfilestart={() => setImageUploadStatus("uploading")}
+            onaddfilestart={() => {
+              setImageUploadStatus("uploading");
+              setUploadError("");
+            }}
             onprocessfiles={() => setImageUploadStatus("idle")}
+            onerror={(error) => {
+              setImageUploadStatus("idle");
+              setUploadError(error.body);
+            }}
+            onprocessfileabort={() => setImageUploadStatus("idle")}
             allowMultiple={false}
             allowFileTypeValidation={true}
             labelFileTypeNotAllowed="File type is invalid. Please please upload jpeg, png, or gif file types only."
@@ -130,7 +146,7 @@ export default function EditRecipe({ FilePond }) {
             defaultValue={recipeDetails.description}
             minLength={10}
             maxLength={1000}
-            pattern="^[a-zA-Z0-9' \-]+$"
+            pattern="^[^<>]*$"
             required
           ></textarea>
 
@@ -141,21 +157,27 @@ export default function EditRecipe({ FilePond }) {
             cols="30"
             rows="10"
             defaultValue={recipeDetails.ingredients}
-            required
             minLength={5}
             maxLength={1000}
+            pattern="^[^<>]*$"
+            placeholder="Ingredient 1&#13;Ingredient 2&#13;Ingredient 3&#13;etc."
+            required
           ></textarea>
 
-          <label htmlFor="instructions">Instructions</label>
+          <label htmlFor="instructions">
+            Instructions (Use a numbered list.)
+          </label>
           <textarea
             name="instructions"
             id="instructions"
             cols="30"
             rows="10"
             defaultValue={recipeDetails.instructions}
-            required
             minLength={10}
             maxLength={5000}
+            pattern="^[^<>]*$"
+            placeholder="1. Prepare the carrots.&#13;2. Brown the meat.&#13;3. Bring water to a boil.&#13;4. etc..."
+            required
           ></textarea>
 
           <label htmlFor="time">Time (in minutes)</label>
