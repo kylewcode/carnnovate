@@ -1,4 +1,3 @@
-// 1. Create script
 import "dotenv/config";
 import mysql from "mysql2/promise";
 
@@ -21,6 +20,12 @@ const s3Client = new S3Client({});
 
 const cleanupThresholdInterval = 10;
 
+async function deleteOrphanedData() {
+  await cleanOrphanedImages();
+  await cleanOrphanedSessions();
+  await closePool();
+}
+
 async function cleanOrphanedImages() {
   try {
     const selectOrphanedImagesQuery = `
@@ -34,9 +39,7 @@ async function cleanOrphanedImages() {
     );
 
     if (selectOrphanedImagesResults.length === 0) {
-      console.log(
-        "[Cleanup Script] No orphaned images found to process. Exiting."
-      );
+      console.log("[Cleanup Script] No orphaned images found to delete.");
 
       return;
     }
@@ -54,7 +57,7 @@ async function cleanOrphanedImages() {
     );
 
     console.log(
-      `Successfully deleted ${Deleted.length} objects from S3 bucket. Deleted objects:`
+      `[Cleanup Script] Successfully deleted ${Deleted.length} objects from S3 bucket. Deleted objects:`
     );
     console.log(Deleted.map((d) => ` • ${d.Key}`).join("\n"));
 
@@ -69,40 +72,52 @@ async function cleanOrphanedImages() {
     );
 
     console.log(
-      `Deleted ${deleteOrphanedImagesResults.affectedRows} temp_images records.`
+      `[Cleanup Script] Deleted ${deleteOrphanedImagesResults.affectedRows} temp_images records.`
     );
   } catch (error) {
     if (error instanceof S3ServiceException && error.name === "NoSuchBucket") {
       console.error(
-        `Error from S3 while deleting objects from ${BUCKET_NAME}. The bucket doesn't exist.`
+        `[Cleanup Script] Error from S3 while deleting objects from ${BUCKET_NAME}. The bucket doesn't exist.`
       );
     } else if (error instanceof S3ServiceException) {
       console.error(
-        `Error from S3 while deleting objects from ${BUCKET_NAME}.  ${error.name}: ${error.message}`
+        `[Cleanup Script] Error from S3 while deleting objects from ${BUCKET_NAME}.  ${error.name}: ${error.message}`
       );
     } else {
       throw error;
     }
-  } finally {
-    console.log(
-      "[Cleanup Script] Entering finally block. Attempting to close database pool..."
-    );
-    if (pool) {
-      try {
-        await pool.end();
-        console.log("[Cleanup Script] Database pool closed cleanly.");
-      } catch (error) {
-        console.error(
-          "[Cleanup Script] ERROR closing database pool:",
-          poolEndError
-        );
-      }
-    }
-    console.log("[Cleanup Script] Exiting cleanup script function.");
   }
 }
-// Clean orphaned sessions
-// function cleanOrphanedSessions() {}
 
-cleanOrphanedImages();
-// cleanOrphanedSessions();
+async function cleanOrphanedSessions() {
+  try {
+    const deleteOrphanedSessionsQuery = `DELETE FROM sessions WHERE expires < UNIX_TIMESTAMP()`;
+    const [deleteOrphanedSessionsQueryResults] = await pool.execute(
+      deleteOrphanedSessionsQuery
+    );
+    if (deleteOrphanedSessionsQueryResults.affectedRows > 0) {
+      console.log("[Cleanup Script] Orphaned sessions deleted");
+    } else {
+      console.log("[Cleanup Script] No orphaned sessions found to delete");
+    }
+  } catch (error) {
+    console.error("[Cleanup Script] Error deleting orphaned sessions: ", error);
+  }
+}
+
+async function closePool() {
+  console.log(
+    "[Cleanup Script] Entering finally block. Attempting to close database pool..."
+  );
+  if (pool) {
+    try {
+      await pool.end();
+      console.log("[Cleanup Script] Database pool closed cleanly.");
+    } catch (error) {
+      console.error("[Cleanup Script] ERROR closing database pool:", error);
+    }
+  }
+  console.log("[Cleanup Script] Exiting cleanup script function.");
+}
+
+deleteOrphanedData();
