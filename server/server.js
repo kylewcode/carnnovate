@@ -980,7 +980,7 @@ app.post("/api/upload-images", upload.single("image"), async (req, res) => {
 
     await fileHandle.close();
 
-    await deleteTempFile(path); // Is this necessary? If the file is being temporarily storerd in S3, why would this be needed?
+    await deleteTempFile(path);
 
     const { status, message } = await checkFileDeletion(path);
     console.log(`${status} : ${message}`);
