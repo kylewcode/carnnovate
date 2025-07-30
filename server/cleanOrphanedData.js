@@ -18,7 +18,7 @@ import {
 } from "@aws-sdk/client-s3";
 const s3Client = new S3Client({});
 
-const cleanupThresholdInterval = 10;
+const cleanupThresholdInterval = 24;
 
 async function deleteOrphanedData() {
   await cleanOrphanedImages();
@@ -30,7 +30,7 @@ async function cleanOrphanedImages() {
   try {
     const selectOrphanedImagesQuery = `
       SELECT s3_object_key FROM temp_images
-      WHERE created_at < NOW() - INTERVAL ? SECOND;
+      WHERE created_at < NOW() - INTERVAL ? HOUR;
     `;
     const selectOrphanedImagesVars = [cleanupThresholdInterval];
     const [selectOrphanedImagesResults] = await pool.execute(
